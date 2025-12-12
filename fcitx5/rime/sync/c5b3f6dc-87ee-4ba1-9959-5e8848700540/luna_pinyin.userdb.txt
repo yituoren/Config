@@ -1,9 +1,0 @@
-# Rime user dictionary
-#@/db_name	luna_pinyin
-#@/db_type	userdb
-#@/rime_version	1.14.0
-#@/tick	4
-#@/user_id	c5b3f6dc-87ee-4ba1-9959-5e8848700540
-an zhuang 	安裝	c=1 d=1 t=4
-gao ke jun 	高可雋	c=2 d=1.97516 t=4
-ru he 	如何	c=1 d=0.995012 t=4

@@ -1,0 +1,173 @@
+################
+# 显示器配置
+################
+# 自动检测显示器，使用最大分辨率。如果你是笔记本外接显示器，可能需要手动调整
+monitor = DP-2, 2560x1440@144, 2560x0, 1
+monitor = eDP-1, 2560x1600@144, 0x0, 1
+
+
+################
+# 关键：自启动 (exec-once)
+################
+# 1. 启动 Waybar (状态栏)
+exec-once = waybar
+
+# 2. 启动 Fcitx5 输入法 (我看你包列表里有 fcitx5-qt，所以你肯定用这个)
+exec-once = fcitx5 -d --replace
+
+# 3. 启动通知服务
+exec-once = dunst
+
+# 4. 启动壁纸 (需要自己配置 hyprpaper.conf，或者换成 swww)
+exec-once = hyprpaper
+
+# 5. 启动身份认证代理 (非常重要！否则 GUI 软件没法输 root 密码)
+# 注意：你需要确认你装了 polkit-kde-agent (因为你有 KDE 包)
+exec-once = /usr/lib/polkit-kde-authentication-agent-1
+
+
+################
+# 关键：环境变量 (Environment Variables)
+################
+# 之前跟你说的 Qt 修复就在这里！
+env = QT_QPA_PLATFORM,wayland;xcb
+env = QT_QPA_PLATFORMTHEME,qt6ct   # 或者 use "kde" 如果你想用 Plasma 的样式
+env = QT_WAYLAND_DISABLE_WINDOWDECORATION,1
+env = QT_AUTO_SCREEN_SCALE_FACTOR,1
+
+# 让其他工具也强制走 Wayland
+env = GDK_BACKEND,wayland,x11
+env = SDL_VIDEODRIVER,wayland
+env = CLUTTER_BACKEND,wayland
+env = XDG_CURRENT_DESKTOP,Hyprland
+env = XDG_SESSION_TYPE,wayland
+env = XDG_SESSION_DESKTOP,Hyprland
+
+# 输入法相关
+env = XMODIFIERS,@im=fcitx
+# env = GTK_IM_MODULE,fcitx  # 某些应用可能需要注释掉这行以防崩溃
+# env = QT_IM_MODULE,fcitx   # Qt6 官方建议不设这个变量，由 locale 处理，但如果输入法不出来可以解开注释试试
+
+# Nvidia相关
+env = LIBVA_DRIVER_NAME,nvidia
+env = __GLX_VENDOR_LIBRARY_NAME,nvidia
+
+
+################
+# 基础外观
+################
+general {
+    gaps_in = 5
+    gaps_out = 10
+    border_size = 2
+    col.active_border = rgba(33ccffee) rgba(00ff99ee) 45deg
+    col.inactive_border = rgba(595959aa)
+
+    layout = dwindle # 默认是 dwindle 布局，很多新手喜欢
+}
+
+decoration {
+    rounding = 10
+    
+    # 模糊效果 (耗费一点点显卡资源，但很好看)
+    blur {
+        enabled = true
+        size = 3
+        passes = 1
+        new_optimizations = false
+        xray = false
+    }
+
+    shadow {
+        enabled = true
+        range = 4
+        render_power = 3
+        color = rgba(1a1a1aee)
+    }
+}
+
+animations {
+    enabled = true
+
+    # 定义一个“过冲”的曲线 (超过1.0代表会弹出去再回来)
+    bezier = overshot, 0.47,0.25,0.1,1.64
+    bezier = smoothIn, 0.25, 1, 0.5, 1
+
+    # 窗口打开：使用 popin (缩放弹出) 加上回弹效果
+    animation = windows, 1, 5, overshot, gnomed
+    animation = windowsMove, 1, 5, overshot, gnomed
+
+    # 边框变色动画
+    animation = border, 1, 10, default
+    
+    # 渐变动画
+    animation = fade, 1, 10, smoothIn
+    animation = fadeDim, 1, 10, smoothIn
+
+    # 工作区切换：滑动效果
+    animation = workspaces, 1, 6, overshot, slidefadevert
+}
+
+################
+# 输入设备
+################
+input {
+    kb_layout = us
+    follow_mouse = 1
+    # scroll_method = reversed
+
+    touchpad {
+        # natural_scroll = yes # 如果是笔记本，想自然滚动改成 yes
+    }
+}
+
+################
+# 快捷键 (Keybindings)
+################
+$mainMod = SUPER # SUPER 就是 Windows 键
+
+# 核心操作
+bind = $mainMod, Q, exec, wezterm          # 打开终端 (Kitty)
+bind = $mainMod, C, killactive,          # 关闭当前窗口
+bind = $mainMod, X, exit,                # 退出 Hyprland (注销)
+bind = $mainMod, E, exec, dolphin        # 打开文件管理器 (你有 KDE 包，应该有 dolphin)
+bind = $mainMod, V, togglefloating,      # 切换浮动模式
+bind = $mainMod, R, exec, wofi --show drun # 打开程序启动器菜单
+bindm = $mainMod, mouse:272, movewindow
+bindm = $mainMod, mouse:273, resizewindow
+
+# 窗口切换 (用方向键或 hjkl)
+bind = $mainMod, left, movefocus, l
+bind = $mainMod, right, movefocus, r
+bind = $mainMod, up, movefocus, u
+bind = $mainMod, down, movefocus, d
+
+# 切换工作区 (1-10)
+bind = $mainMod, 1, workspace, 1
+bind = $mainMod, 2, workspace, 2
+bind = $mainMod, 3, workspace, 3
+bind = $mainMod, 4, workspace, 4
+bind = $mainMod, 5, workspace, 5
+
+bind = $mainMod, bracketleft, workspace, r-1
+bind = $mainMod, bracketright, workspace, r+1
+bind = $mainMod, mouse_down, workspace, m-1
+bind = $mainMod, mouse_up, workspace, m+1
+
+# 移动窗口到工作区
+bind = $mainMod SHIFT, 1, movetoworkspace, 1
+bind = $mainMod SHIFT, 2, movetoworkspace, 2
+bind = $mainMod SHIFT, 3, movetoworkspace, 3
+bind = $mainMod SHIFT, 4, movetoworkspace, 4
+bind = $mainMod SHIFT, 5, movetoworkspace, 5
+
+bind = $mainMod SHIFT, bracketleft, movetoworkspace, r-1
+bind = $mainMod SHIFT, bracketright, movetoworkspace, r+1
+bind = $mainMod SHIFT, mouse_down, movetoworkspace, m-1
+bind = $mainMod SHIFT, mouse_up, movetoworkspace, m+1
+
+workspace = 1, monitor:DP-2
+workspace = 2, monitor:DP-2
+workspace = 3, monitor:DP-2
+workspace = 4, monitor:DP-2
+workspace = 5, monitor:eDP-1
