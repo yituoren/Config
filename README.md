@@ -15,8 +15,8 @@
   </p>
   
   <p align="center">
-    <a href="#-gallery">🖼️ Gallery</a> •
-    <a href="#-components">🧩 Components</a>
+    <a>🖼️ Gallery</a> •
+    <a>🧩 Components</a>
   </p>
 </div>
 
