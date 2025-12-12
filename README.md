@@ -1,35 +1,73 @@
-# My Personal Arch Dotfiles
+<div align="center">
+  <img src="assets/wallpaper.jpg" width="100%" style="object-fit: cover; border-radius: 10px;">
+  
+  <h1 align="center">My Arch Linux Dotfiles</h1>
 
-These are my custom configuration files for my Arch Linux. 
+  <p align="center">
+    <strong>A personalized, aesthetic, and functional configuration for Arch Linux.</strong>
+  </p>
 
-You are welcome to copy any of them for your own use, but remember to give the original repo a star! 
+  <p align="center">
+    <img src="https://img.shields.io/badge/Arch%20Linux-1793D1?style=for-the-badge&logo=arch-linux&logoColor=white" alt="Arch Linux" />
+    <img src="https://img.shields.io/badge/Hyprland-00A4A6?style=for-the-badge&logo=c&logoColor=white" alt="Hyprland" />
+    <img src="https://img.shields.io/badge/WezTerm-3C2C46?style=for-the-badge&logo=wezterm&logoColor=white" alt="WezTerm" />
+    <img src="https://img.shields.io/badge/Zsh-F15A24?style=for-the-badge&logo=zsh&logoColor=white" alt="Zsh" />
+  </p>
+  
+  <p align="center">
+    <a href="#-gallery">🖼️ Gallery</a> •
+    <a href="#-components">🧩 Components</a>
+  </p>
+</div>
 
-If you find this repo helpful, please give it a star. 
+<br />
 
-## Content
+> Welcome to my personal sanctuary of configurations. These dotfiles represent my journey in crafting a workflow that is both productive and visually pleasing. Feel free to explore, copy, and adapt!
+>
+> **⭐ If you find this helpful, please consider giving this repo a star!**
 
-### Window Manager & Desktop Shell
+---
 
-- [hyprland](https://github.com/hyprwm/Hyprland)
-    - [hyprscrolling](https://github.com/hyprwm/hyprland-plugins)
-- [illogical-impulse-quickshell](https://github.com/end-4/dots-hyprland)
+## 🖼️ Gallery
 
-### Terminal & Shell
+<div align="center">
+  <img src="assets/appearance.jpg" alt="Desktop Appearance" width="100%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <br>
+  <i>The wallpaper shown above can be found in <code>assets/wallpaper.jpg</code>.</i>
+</div>
 
-- zsh: shell
-- [powerlevel10k](https://github.com/romkatv/powerlevel10k): prompt & theme
-- [zimfw](https://github.com/zimfw/zimfw): plugin manager
-- [wezterm](https://github.com/wezterm/wezterm): terminal simulator
+---
 
-### Input Method
+## 🧩 Components
 
-- [fcitx5](https://github.com/fcitx/fcitx5): input method framework
-- [rime](https://github.com/fcitx/fcitx5-rime): engine
-- [rime-ice](https://github.com/iDvel/rime-ice): configuration
-- [candlelight](https://github.com/thep0y/fcitx5-themes-candlelight): theme
+### 🖥️ Window Manager & Desktop
 
-## Final Appearance
+| Component | Description | Link |
+| :--- | :--- | :--- |
+| **Compositor** | **Hyprland** | [Repo](https://github.com/hyprwm/Hyprland) |
+| **Plugin** | **hyprscrolling** (Niri-like scrolling) | [Repo](https://github.com/hyprwm/hyprland-plugins) |
+| **Shell Config** | **illogical-impulse-quickshell** (Quickshell based) | [Repo](https://github.com/end-4/dots-hyprland) |
 
-<img src="assets/appearance.jpg"/>
+### 🚀 Terminal & Shell
 
-By the way, the wallpaper is in "assets/wallpaper.jpg", enjoy yourself!
+| Component | Description | Link |
+| :--- | :--- | :--- |
+| **Terminal** | **WezTerm** (GPU Accelerated) | [Repo](https://github.com/wezterm/wezterm) |
+| **Shell** | **Zsh** | - |
+| **Prompt** | **Powerlevel10k** | [Repo](https://github.com/romkatv/powerlevel10k) |
+| **Plugin Mgr** | **Zimfw** | [Repo](https://github.com/zimfw/zimfw) |
+
+### ⌨️ Input Method (IME)
+
+| Component | Description | Link |
+| :--- | :--- | :--- |
+| **Framework** | **Fcitx5** | [Repo](https://github.com/fcitx/fcitx5) |
+| **Engine** | **Rime** (中州韵) | [Repo](https://github.com/fcitx/fcitx5-rime) |
+| **Schema** | **Rime-Ice** (雾凇拼音) | [Repo](https://github.com/iDvel/rime-ice) |
+| **Theme** | **Candlelight** | [Repo](https://github.com/thep0y/fcitx5-themes-candlelight) |
+
+---
+
+## 📄 License
+
+Feel free to use and modify these configurations. A star back to the original repo would be appreciated!
