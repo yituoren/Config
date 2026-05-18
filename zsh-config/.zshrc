@@ -130,18 +130,25 @@ unset key
 
 
 # >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/yituoren/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/yituoren/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/yituoren/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/yituoren/miniconda3/bin:$PATH"
+# Cross-machine compatible. DO NOT run `conda init zsh` - it will overwrite this.
+for _conda_root in \
+    "$HOME/miniconda3" \
+    "$HOME/anaconda3"
+do
+    if [[ -f "$_conda_root/bin/conda" ]]; then
+        __conda_setup="$("$_conda_root/bin/conda" shell.zsh hook 2> /dev/null)"
+        if [[ $? -eq 0 ]]; then
+            eval "$__conda_setup"
+        elif [[ -f "$_conda_root/etc/profile.d/conda.sh" ]]; then
+            . "$_conda_root/etc/profile.d/conda.sh"
+        else
+            export PATH="$_conda_root/bin:$PATH"
+        fi
+        unset __conda_setup
+        break
     fi
-fi
-unset __conda_setup
+done
+unset _conda_root
 # <<< conda initialize <<<
 
 start_proxy() {

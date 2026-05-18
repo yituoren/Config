@@ -59,7 +59,7 @@ zmodule zsh-users/zsh-autosuggestions
 
 zmodule fzf
 zmodule Aloxaf/fzf-tab
-zmodule eriner
+# zmodule eriner
 zmodule hlissner/zsh-autopair
 zmodule magicmace
 zmodule agkozak/zsh-z
