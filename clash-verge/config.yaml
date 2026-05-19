@@ -1,0 +1,75 @@
+mixed-port: 7897
+mode: rule
+log-level: info
+allow-lan: false
+ipv6: false
+
+dns:
+  enable: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  fallback:
+    - https://1.1.1.1/dns-query
+    - https://dns.google/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+
+proxies:
+  - name: "Reality"
+    type: vless
+    server: 45.76.193.194
+    port: 443
+    uuid: your_uuid_here
+    network: tcp
+    tls: true
+    udp: true
+    flow: xtls-rprx-vision
+    servername: aws.amazon.com
+    reality-opts:
+      public-key: your_public_key_here
+      short-id: ""
+    client-fingerprint: chrome
+
+proxy-groups:
+  - name: "PROXY"
+    type: select
+    proxies:
+      - Reality
+      - DIRECT
+
+rules:
+  - DOMAIN-KEYWORD,google,PROXY
+  - DOMAIN-KEYWORD,gvt1,PROXY
+  - DOMAIN-KEYWORD,gvt2,PROXY
+  - DOMAIN-KEYWORD,gstatic,PROXY
+  - DOMAIN-KEYWORD,ggpht,PROXY
+  - DOMAIN-SUFFIX,ytimg.com,PROXY
+  - DOMAIN-SUFFIX,1e100.net,PROXY
+    
+  - DOMAIN-KEYWORD,openai,PROXY
+  - DOMAIN-KEYWORD,chatgpt,PROXY
+  - DOMAIN-KEYWORD,gemini,PROXY
+  - DOMAIN-KEYWORD,claude,PROXY
+  - DOMAIN-KEYWORD,anthropic,PROXY
+    
+  - DOMAIN-KEYWORD,cursor,PROXY
+  - DOMAIN-KEYWORD,huggingface,PROXY
+  - DOMAIN-KEYWORD,wandb,PROXY
+  - DOMAIN-KEYWORD,github,PROXY
+    
+  - DOMAIN-KEYWORD,youtube,PROXY
+  - DOMAIN-SUFFIX,x.com,PROXY
+  - DOMAIN-KEYWORD,reddit,PROXY
+  - DOMAIN-SUFFIX,redd.it,PROXY
+    
+  - DOMAIN-KEYWORD,golang,PROXY
+
+  - GEOIP,LAN,DIRECT
+  - GEOIP,CN,DIRECT

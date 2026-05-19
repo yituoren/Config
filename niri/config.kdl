@@ -1,0 +1,16 @@
+// niri 配置入口 —— 由 hypr/ 迁移而来
+// 按功能拆分,各模块通过顶层 include 引入(niri 26.04+ 起支持)。
+// 文档:https://yalter.github.io/niri/  ·  保存任意文件 niri 都会自动热重载。
+//
+// 关于 include:
+//   - 路径相对于本文件所在目录(~/.config/niri/)。
+//   - 同名 section 会按 include 顺序合并,后者覆盖前者。
+//   - include 只能写在顶层,不能放进 layout {} 等块内部。
+
+include "environment.kdl"   // 环境变量
+include "input.kdl"         // 键盘 / 触控板 / 鼠标
+include "outputs.kdl"       // 显示器
+include "layout.kdl"        // 布局 / 间距 / 阴影 / 模糊
+include "startup.kdl"       // 开机启动 / 光标 / 杂项
+include "rules.kdl"         // 窗口规则 / 图层规则
+include "binds.kdl"         // 快捷键

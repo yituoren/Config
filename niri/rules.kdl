@@ -1,0 +1,86 @@
+// 窗口规则 / 图层规则
+// 对应 hypr/hyprland/rules.conf + hypr/custom/rules.conf
+// ★ 已大幅精简:原 rules.conf 约 80 行 → 这里 ~3 条 window-rule。
+
+// 圆角 + 窗口模糊 —— 对应 decoration { rounding = 18 } 和 custom/rules.conf 的 no_blur off
+// 无 match 的 window-rule 作用到所有窗口。
+// background-effect 让所有半透明窗口背后模糊(模糊跟随 geometry-corner-radius 圆角)。
+window-rule {
+    geometry-corner-radius 18
+    clip-to-geometry true
+    background-effect {
+        blur true
+    }
+}
+
+// 浮动:设置类小窗口(对应原 pavucontrol / nm-connection-editor / blueberry 规则)
+window-rule {
+    match app-id="pavucontrol"
+    match app-id="org.pulseaudio.pavucontrol"
+    match app-id="nm-connection-editor"
+    match app-id="blueberry"
+    open-floating true
+}
+
+// 画中画:浮动并固定在右下角(对应原 Picture-in-Picture 规则)
+window-rule {
+    match title="^Picture[-\\s]?in[-\\s]?Picture$"
+    open-floating true
+    default-floating-position x=32 y=32 relative-to="bottom-right"
+}
+
+// 文件对话框浮动 —— Open File / Save As / ... 的 float 规则
+// 两种匹配方式:
+//   1) app-id:走 xdg-desktop-portal 的文件选择器(现代应用大多如此),
+//      整个对话框是 portal 的独立窗口,app-id 固定。
+//   2) title:应用自己画的 GTK/Qt 文件选择子窗口,app-id 跟父应用一样,
+//      只能靠标题认。标题区分大小写、按正则匹配。
+//
+// ★ 下面的 app-id / title 都是按惯例推测,不保证与实际一致(标题还跟系统语言走)。
+//   进 niri 后把对话框打开着,运行 `niri msg windows` 查窗口真实的 app-id/title,
+//   再回来订正这条规则。
+window-rule {
+    // 方式 1:portal 文件选择器
+    // KDE 后端 —— 已由 ii 原 rules.conf 验证(ii 用的就是这个)
+    match app-id="org.freedesktop.impl.portal.desktop.kde"
+    // GTK / GNOME 后端 —— 按 KDE 的命名类推,未亲自验证
+    match app-id="org.freedesktop.impl.portal.desktop.gtk"
+    match app-id="org.freedesktop.impl.portal.desktop.gnome"
+
+    // 方式 2:按对话框标题
+    match title="^Open File"
+    match title="^Open Files"
+    match title="^Open Folder"
+    match title="^Save File"
+    match title="^Save As"
+    match title="^Select a File"
+    match title="^Select Folder"
+    match title="^Choose wallpaper"
+    match title="^File Upload"
+    match title="wants to save$"
+    match title="wants to open$"
+
+    open-floating true
+}
+
+// ============================================================
+// 图层规则模板  (★等你自己的 shell 建好后启用)
+// 对应原 rules.conf 里的 layerrule blur ... ignore_alpha ...
+// match namespace 要填你 shell 的 layer-shell namespace。
+// ============================================================
+//
+// layer-rule {
+//     match namespace="^quickshell-bar$"
+//     match namespace="^quickshell-sidebar.*$"
+//     background-effect {
+//         blur true
+//     }
+// }
+//
+// fuzzel 启动器也可以加模糊:
+// layer-rule {
+//     match namespace="^launcher$"
+//     background-effect {
+//         blur true
+//     }
+// }

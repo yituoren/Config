@@ -1,0 +1,19 @@
+// 显示器
+//
+// ★ mode 的刷新率必须与显示器实际汇报的值一致(可能是 144.000 也可能是
+//   143.998 之类)。第一次进 niri 后用 `niri msg outputs` 查准确字符串,
+//   再回填到下面。若 mode 写错,niri 会回退到 preferred 模式。
+
+output "eDP-1" {
+    mode "2560x1600@144.000"
+    scale 1
+    position x=0 y=0
+    variable-refresh-rate       // = vrr = 1
+}
+
+output "DP-2" {
+    mode "2560x1440@144.000"
+    scale 1
+    position x=2560 y=0
+    variable-refresh-rate
+}

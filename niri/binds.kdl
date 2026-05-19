@@ -1,0 +1,125 @@
+// 快捷键  (对应 hypr/hyprland/keybinds.conf + hypr/custom/keybinds.conf)
+// ★ 已大幅精简。niri 的 Mod 默认就是 Super 键。
+
+binds {
+    // ---- Shell / 系统面板 -------------------------------------------------
+    // ★ 原来这些是 `global, quickshell:xxx` 派发器,niri 没有这种机制。
+    //   现在先绑到可用的回退程序;等你自己的 shell 建好,改成 spawn "qs" "ipc" "call" ...
+    Mod+Slash       { show-hotkey-overlay; }                 // 暂用 niri 内置快捷键面板,将来换成 shell 的 cheatsheet
+    Mod+Space       { spawn "fuzzel"; }                      // 应用启动器(原来是 Super 单击,niri 无法绑修饰键单击)
+    Mod+V           { spawn-sh "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }  // 剪贴板历史
+    // Mod+Period      { spawn-sh "~/.config/hypr/hyprland/scripts/fuzzel-emoji.sh copy"; }        // emoji
+    Ctrl+Alt+Delete { spawn "wlogout"; }                     // 会话菜单
+
+    // ---- 应用启动 ---------------------------------------------------------
+    // ★ 原来每个都用 launch_first_available.sh 列一长串候选,已精简为单条命令。
+    //   xdg-terminal-exec 会读你 ~/.config/xdg-terminals.list(kitty.md 里已配)。
+    Mod+Return hotkey-overlay-title="终端"   { spawn "xdg-terminal-exec"; }
+    Mod+T      hotkey-overlay-title="终端"   { spawn "wezterm"; }
+    Mod+W      hotkey-overlay-title="浏览器" { spawn "google-chrome-stable"; }
+    Mod+E      hotkey-overlay-title="文件管理器" { spawn "nautilus"; }
+    Mod+C      hotkey-overlay-title="编辑器" { spawn "zed"; }     // 来自 custom/keybinds.conf
+
+    // ---- 窗口操作 ---------------------------------------------------------
+    Mod+Q           { close-window; }
+    Alt+F4          { close-window; }
+
+    // 焦点:左右切列,上下切列内窗口
+    Mod+Left        { focus-column-left; }
+    Mod+Right       { focus-column-right; }
+    Mod+Up          { focus-window-up; }
+    Mod+Down        { focus-window-down; }
+
+    // 移动窗口
+    Mod+Shift+Left  { move-column-left; }
+    Mod+Shift+Right { move-column-right; }
+    Mod+Shift+Up    { move-window-up; }
+    Mod+Shift+Down  { move-window-down; }
+
+    Mod+D           { maximize-column; }          // = Hyprland 的 fullscreen 1(最大化)
+    Mod+F           { fullscreen-window; }         // = fullscreen 0(全屏)
+    Mod+Alt+Space   { toggle-window-floating; }    // = togglefloating
+
+    // 列宽 / 行高(替代 Hyprland 的 splitratio)
+    Mod+Minus       { set-column-width "-10%"; }
+    Mod+Equal       { set-column-width "+10%"; }
+    Mod+R           { switch-preset-column-width; }   // 在 layout.kdl 的 preset-column-widths 间循环
+    Mod+Shift+R     { switch-preset-window-height; }
+
+    // niri 滚动平铺特有:把窗口并入/移出当前列
+    Mod+Comma       { consume-window-into-column; }
+    Mod+Period      { expel-window-from-column; }
+
+    // ---- 工作区 -----------------------------------------------------------
+    // ★ 原来用 raw keycode + 小键盘重复绑定共 40 行,这里精简为数字行 1-0。
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+0 { focus-workspace 10; }
+
+    // 移动到工作区(focus=false 对应原来的 movetoworkspace*silent*)
+    Mod+Shift+1 { move-column-to-workspace 1 focus=false; }
+    Mod+Shift+2 { move-column-to-workspace 2 focus=false; }
+    Mod+Shift+3 { move-column-to-workspace 3 focus=false; }
+    Mod+Shift+4 { move-column-to-workspace 4 focus=false; }
+    Mod+Shift+5 { move-column-to-workspace 5 focus=false; }
+    Mod+Shift+6 { move-column-to-workspace 6 focus=false; }
+    Mod+Shift+7 { move-column-to-workspace 7 focus=false; }
+    Mod+Shift+8 { move-column-to-workspace 8 focus=false; }
+    Mod+Shift+9 { move-column-to-workspace 9 focus=false; }
+    Mod+Shift+0 { move-column-to-workspace 10 focus=false; }
+
+    // 相邻工作区切换
+    Mod+Page_Up        { focus-workspace-up; }
+    Mod+Page_Down      { focus-workspace-down; }
+    Mod+BracketLeft    { focus-workspace-up; }     // 来自 custom/keybinds.conf
+    Mod+BracketRight   { focus-workspace-down; }   // 来自 custom/keybinds.conf
+    Mod+Shift+Page_Up   { move-column-to-workspace-up; }
+    Mod+Shift+Page_Down { move-column-to-workspace-down; }
+
+    // 鼠标滚轮切工作区
+    Mod+WheelScrollUp   cooldown-ms=150 { focus-workspace-up; }
+    Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+    Mod+Shift+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
+    Mod+Shift+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
+
+    // 概览
+    Mod+Tab { toggle-overview; }
+
+    // ---- 多显示器 ---------------------------------------------------------
+    Mod+Ctrl+Left   { focus-monitor-left; }
+    Mod+Ctrl+Right  { focus-monitor-right; }
+    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+
+    // ---- 截图 / OCR / 取色 ----
+    Mod+Shift+S { screenshot; }            // 交互式区域截图 UI
+    Print       { screenshot-screen; }     // 整屏 → 剪贴板 + 文件
+    Mod+Alt+S   { screenshot-window; }     // 当前窗口
+    Mod+Shift+C { spawn "hyprpicker" "-a"; }   // 取色(hyprpicker 在 niri 下可用)
+    Mod+Shift+X { spawn-sh "grim -g \"$(slurp)\" /tmp/ocr.png && tesseract /tmp/ocr.png stdout | wl-copy && rm /tmp/ocr.png"; }  // OCR
+
+    // ---- 媒体 / 音量 / 亮度  (allow-when-locked 对应 Hyprland 的 bindl) ----
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+" "--limit" "1.5"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02-"; }
+    XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+    XF86MonBrightnessUp   allow-when-locked=true { spawn "brightnessctl" "set" "5%+"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "set" "5%-"; }
+    XF86AudioPlay  allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioNext  allow-when-locked=true { spawn "playerctl" "next"; }
+    XF86AudioPrev  allow-when-locked=true { spawn "playerctl" "previous"; }
+
+    // ---- 会话 -------------------------------------------------------------
+    Mod+L       { spawn "loginctl" "lock-session"; }   // 锁屏(由 hypridle 触发 hyprlock)
+    Mod+Shift+L { spawn "systemctl" "suspend"; }       // 睡眠
+    Mod+Shift+E { quit; }                              // 退出 niri(带确认)
+
+    // niri 不需要绑定「重载配置」—— 保存任意配置文件即自动热重载。
+}

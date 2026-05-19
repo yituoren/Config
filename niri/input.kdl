@@ -1,0 +1,28 @@
+// 输入设备
+
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+        // 对应 repeat_delay / repeat_rate
+        repeat-delay 250
+        repeat-rate 35
+        // 对应 numlock_by_default
+        numlock
+    }
+
+    touchpad {
+        tap
+        natural-scroll          // = natural_scroll
+        dwt                     // = disable_while_typing
+        click-method "clickfinger"   // = clickfinger_behavior
+        scroll-factor 0.7       // = scroll_factor
+    }
+
+    mouse {}
+
+    // mouse behavior
+    focus-follows-mouse
+    warp-mouse-to-focus
+}

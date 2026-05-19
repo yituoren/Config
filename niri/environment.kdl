@@ -1,0 +1,26 @@
+// 环境变量
+// 注意:environment {} 的值是字面字符串,不做 $HOME / $VAR 展开。
+
+environment {
+    // 输入法 fcitx5
+    QT_IM_MODULE "fcitx"
+    XMODIFIERS "@im=fcitx"
+    SDL_IM_MODULE "fcitx"
+    GLFW_IM_MODULE "ibus"
+    INPUT_METHOD "fcitx"
+
+    // Qt / 主题
+    QT_QPA_PLATFORM "wayland"
+    QT_QPA_PLATFORMTHEME "kde"
+    XDG_MENU_PREFIX "plasma-"
+
+    // 杂项
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    WEBKIT_DISABLE_COMPOSITING_MODE "1"
+    TERMINAL "wezterm"
+
+    // NVIDIA
+    LIBVA_DRIVER_NAME "nvidia"
+    __GLX_VENDOR_LIBRARY_NAME "nvidia"
+
+}

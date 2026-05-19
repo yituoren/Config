@@ -1,0 +1,45 @@
+// 开机启动 / 光标 / 杂项
+
+// ---- 开机启动 ----------------------------------------------------------
+// 输入法
+spawn-at-startup "fcitx5" "-d" "--replace"
+
+// 密钥环 / 空闲管理(hypridle 与合成器无关,可继续用)
+spawn-at-startup "gnome-keyring-daemon" "--start" "--components=secrets"
+spawn-at-startup "hypridle"
+
+// 音频效果
+spawn-at-startup "easyeffects" "--hide-window" "--service-mode"
+
+// 剪贴板历史(cliphist + wl-paste 监听,与合成器无关)
+spawn-sh-at-startup "wl-paste --type text  --watch cliphist store"
+spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
+
+// 天气定位用的 geoclue agent(脚本仍在 hypr/ 下,路径有效)
+spawn-sh-at-startup "~/.config/hypr/hyprland/scripts/start_geoclue_agent.sh"
+
+// TODO: 你自己的 Quickshell shell 建好后,在这里加一行启动它,例如:
+// spawn-at-startup "qs" "-c" "你的shell名"
+
+// TODO: 临时的 polkit 认证代理(原来由 ii 的 shell 提供,shell 建好后可删)
+// spawn-at-startup "/usr/lib/polkit-kde-authentication-agent-1"
+
+// ---- 光标  (对应 execs.conf 里的 hyprctl setcursor) -------------------
+cursor {
+    xcursor-theme "Bibata-Modern-Classic"
+    xcursor-size 24
+}
+
+// ---- 杂项 --------------------------------------------------------------
+prefer-no-csd                       // 让应用不画自己的标题栏(niri 本身无标题栏)
+screenshot-path "~/Pictures/Screenshots/Screenshot-%Y%m%d-%H%M%S.png"
+
+hotkey-overlay {
+    skip-at-startup                  // 不在开机时弹快捷键面板
+}
+
+gestures {
+    hot-corners {
+        off                          // 关掉鼠标移到角落触发概览(避免误触)
+    }
+}
