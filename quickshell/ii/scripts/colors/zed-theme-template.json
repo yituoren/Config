@@ -1,0 +1,744 @@
+{
+  "$schema": "https://zed.dev/schema/themes/v0.2.0.json",
+  "name": "Matugen",
+  "author": "generated from wallpaper (quickshell material colors)",
+  "themes": [
+    {
+      "name": "Matugen",
+      "appearance": "dark",
+      "style": {
+        "accents": [
+          "{{tertiary}}",
+          "{{onBackground}}",
+          "{{tertiary}}",
+          "{{success}}",
+          "{{error}}",
+          "{{error}}",
+          "{{tertiary}}"
+        ],
+        "vim.mode.text": "{{tertiaryContainer}}",
+        "vim.normal.foreground": "{{tertiaryContainer}}",
+        "vim.helix_normal.foreground": "{{tertiaryContainer}}",
+        "vim.visual.foreground": "{{tertiaryContainer}}",
+        "vim.helix_select.foreground": "{{tertiaryContainer}}",
+        "vim.insert.foreground": "{{tertiaryContainer}}",
+        "vim.visual_line.foreground": "{{tertiaryContainer}}",
+        "vim.visual_block.foreground": "{{tertiaryContainer}}",
+        "vim.replace.foreground": "{{tertiaryContainer}}",
+        "vim.normal.background": "{{onBackground}}",
+        "vim.helix_normal.background": "{{onBackground}}",
+        "vim.visual.background": "{{onBackground}}",
+        "vim.helix_select.background": "{{onBackground}}",
+        "vim.insert.background": "{{success}}",
+        "vim.visual_line.background": "{{onBackground}}",
+        "vim.visual_block.background": "{{tertiary}}",
+        "vim.replace.background": "{{tertiary}}",
+        "background.appearance": "blurred",
+        "border": "{{surfaceVariant}}15",
+        "border.variant": "{{surfaceContainerLowest}}00",
+        "border.focused": "{{onBackground}}",
+        "border.selected": "{{tertiary}}",
+        "border.transparent": "{{success}}",
+        "border.disabled": "{{outline}}",
+        "elevated_surface.background": "{{surfaceContainerLowest}}",
+        "surface.background": "{{surfaceContainerLowest}}8c",
+        "background": "{{surfaceContainerLowest}}99",
+        "element.background": "{{tertiaryContainer}}",
+        "element.hover": "{{surfaceVariant}}",
+        "element.active": "{{surfaceContainerLowest}}00",
+        "element.selected": "{{surfaceVariant}}4d",
+        "element.disabled": "{{outline}}",
+        "drop_target.background": "{{tertiary}}90",
+        "ghost_element.background": "{{surfaceContainerLowest}}60",
+        "ghost_element.hover": "{{surfaceContainerLowest}}90",
+        "ghost_element.active": "{{tertiary}}30",
+        "ghost_element.selected": "{{tertiary}}50",
+        "ghost_element.disabled": "{{outline}}",
+        "text": "{{onBackground}}",
+        "text.muted": "{{tertiary}}",
+        "text.placeholder": "{{surfaceVariant}}",
+        "text.disabled": "{{surfaceVariant}}",
+        "text.accent": "{{tertiary}}",
+        "icon": "{{onBackground}}",
+        "icon.muted": "{{outline}}",
+        "icon.disabled": "{{outline}}",
+        "icon.placeholder": "{{surfaceVariant}}",
+        "icon.accent": "{{tertiary}}",
+        "status_bar.background": "{{surfaceContainerLowest}}99",
+        "title_bar.background": "{{surfaceContainerLowest}}99",
+        "title_bar.inactive_background": "{{tertiaryContainer}}",
+        "toolbar.background": "{{surfaceContainerLowest}}00",
+        "tab_bar.background": "{{surfaceContainerLowest}}00",
+        "tab.inactive_background": "{{surfaceContainerLowest}}00",
+        "tab.active_background": "{{surfaceContainerLowest}}90",
+        "search.match_background": "{{error}}4d",
+        "search.active_match_background": "{{tertiary}}4d",
+        "panel.background": "{{surfaceContainerLowest}}00",
+        "panel.focused_border": "00000000",
+        "panel.indent_guide": "{{surfaceVariant}}99",
+        "panel.indent_guide_active": "{{surfaceVariant}}",
+        "panel.indent_guide_hover": "{{tertiary}}",
+        "panel.overlay_background": "{{surfaceContainerLow}}",
+        "pane.focused_border": "{{surfaceVariant}}10",
+        "pane_group.border": "{{surfaceVariant}}15",
+        "scrollbar.thumb.background": "{{outline}}80",
+        "scrollbar.thumb.hover_background": "{{outline}}",
+        "scrollbar.thumb.active_background": null,
+        "scrollbar.thumb.border": null,
+        "scrollbar.track.background": "{{surfaceContainerLowest}}00",
+        "scrollbar.track.border": "{{surfaceContainerLowest}}00",
+        "minimap.thumb.background": "{{tertiary}}33",
+        "minimap.thumb.hover_background": "{{tertiary}}66",
+        "minimap.thumb.active_background": "{{tertiary}}99",
+        "minimap.thumb.border": null,
+        "editor.foreground": "{{onBackground}}",
+        "editor.background": "{{surfaceContainerLowest}}00",
+        "editor.gutter.background": "{{surfaceContainerLowest}}00",
+        "editor.subheader.background": "{{tertiaryContainer}}",
+        "editor.active_line.background": "{{surfaceContainerLowest}}00",
+        "editor.highlighted_line.background": "{{onBackground}}12",
+        "editor.line_number": "{{onBackground}}20",
+        "editor.active_line_number": "{{onBackground}}90",
+        "editor.invisible": "{{tertiary}}66",
+        "editor.wrap_guide": "{{surfaceVariant}}",
+        "editor.active_wrap_guide": "{{surfaceVariant}}",
+        "editor.document_highlight.bracket_background": "{{tertiary}}17",
+        "editor.document_highlight.read_background": "{{tertiary}}29",
+        "editor.document_highlight.write_background": "{{tertiary}}29",
+        "editor.indent_guide": "{{surfaceVariant}}99",
+        "editor.indent_guide_active": "{{surfaceVariant}}",
+        "terminal.background": "{{term0}}00",
+        "terminal.ansi.background": "{{term0}}",
+        "terminal.foreground": "{{term7}}",
+        "terminal.dim_foreground": "{{term8}}",
+        "terminal.bright_foreground": "{{term15}}",
+        "terminal.ansi.black": "{{term0}}",
+        "terminal.ansi.white": "{{term7}}",
+        "terminal.ansi.red": "{{term1}}",
+        "terminal.ansi.green": "{{term2}}",
+        "terminal.ansi.yellow": "{{term3}}",
+        "terminal.ansi.blue": "{{term4}}",
+        "terminal.ansi.magenta": "{{term5}}",
+        "terminal.ansi.cyan": "{{term6}}",
+        "terminal.ansi.bright_black": "{{term8}}",
+        "terminal.ansi.bright_white": "{{term15}}",
+        "terminal.ansi.bright_red": "{{term9}}",
+        "terminal.ansi.bright_green": "{{term10}}",
+        "terminal.ansi.bright_yellow": "{{term11}}",
+        "terminal.ansi.bright_blue": "{{term12}}",
+        "terminal.ansi.bright_magenta": "{{term13}}",
+        "terminal.ansi.bright_cyan": "{{term14}}",
+        "terminal.ansi.dim_black": "{{term0}}",
+        "terminal.ansi.dim_white": "{{term7}}",
+        "terminal.ansi.dim_red": "{{term1}}",
+        "terminal.ansi.dim_green": "{{term2}}",
+        "terminal.ansi.dim_yellow": "{{term3}}",
+        "terminal.ansi.dim_blue": "{{term4}}",
+        "terminal.ansi.dim_magenta": "{{term5}}",
+        "terminal.ansi.dim_cyan": "{{term6}}",
+        "link_text.hover": "{{tertiary}}",
+        "conflict": "{{error}}",
+        "conflict.border": "{{error}}",
+        "conflict.background": "{{error}}26",
+        "created": "{{success}}",
+        "created.border": "{{success}}",
+        "created.background": "{{success}}26",
+        "deleted": "{{tertiary}}",
+        "deleted.border": "{{tertiary}}",
+        "deleted.background": "{{tertiary}}26",
+        "hidden": "{{outline}}",
+        "hidden.border": "{{outline}}",
+        "hidden.background": "{{tertiaryContainer}}",
+        "hint": "{{surfaceVariant}}",
+        "hint.border": "{{surfaceVariant}}",
+        "hint.background": "{{surfaceContainerLow}}c0",
+        "ignored": "{{outline}}",
+        "ignored.border": "{{outline}}",
+        "ignored.background": "{{outline}}26",
+        "modified": "{{error}}",
+        "modified.border": "{{error}}",
+        "modified.background": "{{error}}26",
+        "predictive": "{{outline}}",
+        "predictive.border": "{{onBackground}}",
+        "predictive.background": "{{tertiaryContainer}}",
+        "renamed": "{{tertiary}}",
+        "renamed.border": "{{tertiary}}",
+        "renamed.background": "{{tertiary}}26",
+        "info": "{{error}}",
+        "info.border": "{{error}}",
+        "info.background": "{{tertiaryContainer}}",
+        "warning": "{{error}}",
+        "warning.border": "{{error}}",
+        "warning.background": "{{errorContainer}}",
+        "error": "{{tertiary}}",
+        "error.border": "{{tertiary}}",
+        "error.background": "{{tertiaryContainer}}",
+        "success": "{{success}}",
+        "success.border": "{{success}}",
+        "success.background": "{{surfaceContainerHigh}}",
+        "unreachable": "{{tertiary}}",
+        "unreachable.border": "{{tertiary}}",
+        "unreachable.background": "{{tertiary}}1f",
+        "players": [
+          {
+            "cursor": "{{onBackground}}",
+            "selection": "{{tertiary}}40",
+            "background": "{{onBackground}}"
+          },
+          {
+            "cursor": "{{tertiary}}",
+            "selection": "{{tertiary}}40",
+            "background": "{{tertiary}}"
+          },
+          {
+            "cursor": "{{onBackground}}",
+            "selection": "{{onBackground}}40",
+            "background": "{{onBackground}}"
+          },
+          {
+            "cursor": "{{tertiary}}",
+            "selection": "{{tertiary}}40",
+            "background": "{{tertiary}}"
+          },
+          {
+            "cursor": "{{success}}",
+            "selection": "{{success}}40",
+            "background": "{{success}}"
+          },
+          {
+            "cursor": "{{error}}",
+            "selection": "{{error}}40",
+            "background": "{{error}}"
+          },
+          {
+            "cursor": "{{error}}",
+            "selection": "{{error}}40",
+            "background": "{{error}}"
+          },
+          {
+            "cursor": "{{tertiary}}",
+            "selection": "{{tertiary}}40",
+            "background": "{{tertiary}}"
+          }
+        ],
+        "version_control.added": "{{success}}",
+        "version_control.deleted": "{{tertiary}}",
+        "version_control.modified": "{{error}}",
+        "version_control.renamed": "{{tertiary}}",
+        "version_control.conflict": "{{error}}",
+        "version_control.conflict_marker.ours": "{{success}}33",
+        "version_control.conflict_marker.theirs": "{{tertiary}}33",
+        "version_control.ignored": "{{outline}}",
+        "debugger.accent": "{{tertiary}}",
+        "editor.debugger_active_line.background": "{{error}}12",
+        "syntax": {
+          "variable": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "variable.builtin": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "variable.parameter": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "variable.member": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "variable.special": {
+            "color": "{{tertiary}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "constant": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "constant.builtin": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "constant.macro": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "module": {
+            "color": "{{error}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "label": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "string": {
+            "color": "{{success}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "string.documentation": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "string.regexp": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "string.escape": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "string.special": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "string.special.path": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "string.special.symbol": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "string.special.url": {
+            "color": "{{onBackground}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "character": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "character.special": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "boolean": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "number": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "number.float": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "tag": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "tag.attribute": {
+            "color": "{{error}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "tag.delimiter": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "type": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "type.builtin": {
+            "color": "{{tertiary}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "type.definition": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "type.interface": {
+            "color": "{{error}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "type.super": {
+            "color": "{{error}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "attribute": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "property": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "function": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "function.builtin": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "function.call": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "function.macro": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "function.method": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "function.method.call": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "constructor": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "operator": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.modifier": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.type": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.coroutine": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.function": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.operator": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.import": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.repeat": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.return": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.debug": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.exception": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.conditional": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.conditional.ternary": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.directive": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.directive.define": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "keyword.export": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "punctuation": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "punctuation.delimiter": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "punctuation.bracket": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "punctuation.special": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "punctuation.special.symbol": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "punctuation.list_marker": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "comment": {
+            "color": "{{tertiary}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "comment.doc": {
+            "color": "{{tertiary}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "comment.documentation": {
+            "color": "{{tertiary}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "comment.info": {
+            "color": "{{error}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "comment.error": {
+            "color": "{{tertiary}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "comment.warning": {
+            "color": "{{error}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "comment.warn": {
+            "color": "{{error}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "comment.hint": {
+            "color": "{{tertiary}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "comment.todo": {
+            "color": "{{onBackground}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "comment.note": {
+            "color": "{{onBackground}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "diff.plus": {
+            "color": "{{success}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "diff.minus": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "parameter": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "field": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "namespace": {
+            "color": "{{error}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "float": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "symbol": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "string.regex": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "text": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "emphasis.strong": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": 700
+          },
+          "emphasis": {
+            "color": "{{tertiary}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "embedded": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "text.literal": {
+            "color": "{{success}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "concept": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "enum": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": 700
+          },
+          "function.decorator": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "type.class.definition": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": 700
+          },
+          "hint": {
+            "color": "{{outline}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "link_text": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "link_uri": {
+            "color": "{{tertiary}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "parent": {
+            "color": "{{error}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "predictive": {
+            "color": "{{outline}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "predoc": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "primary": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "tag.doctype": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          },
+          "string.doc": {
+            "color": "{{error}}",
+            "font_style": "italic",
+            "font_weight": null
+          },
+          "title": {
+            "color": "{{onBackground}}",
+            "font_style": null,
+            "font_weight": 800
+          },
+          "variant": {
+            "color": "{{tertiary}}",
+            "font_style": null,
+            "font_weight": null
+          }
+        }
+      }
+    }
+  ]
+}
