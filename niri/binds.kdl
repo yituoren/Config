@@ -13,8 +13,7 @@ binds {
 
     // ---- 应用启动 ---------------------------------------------------------
     // ★ 原来每个都用 launch_first_available.sh 列一长串候选,已精简为单条命令。
-    //   xdg-terminal-exec 会读你 ~/.config/xdg-terminals.list(kitty.md 里已配)。
-    Mod+Return hotkey-overlay-title="终端"   { spawn "xdg-terminal-exec"; }
+    Mod+Return hotkey-overlay-title="终端"   { spawn "kitty"; }
     Mod+T      hotkey-overlay-title="终端"   { spawn "wezterm"; }
     Mod+W      hotkey-overlay-title="浏览器" { spawn "google-chrome-stable"; }
     Mod+E      hotkey-overlay-title="文件管理器" { spawn "nautilus"; }

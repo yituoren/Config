@@ -45,7 +45,8 @@ config.default_cursor_style = 'SteadyBar'
 -- 🚀 性能与硬件 (Performance)
 -- =========================================================
 -- 显卡加速前端，通常选 WebGpu 或 OpenGL
-config.front_end = "WebGpu"
+-- WebGpu 在 niri/wlroots 系合成器上有黑屏+无输入问题,固定用 OpenGL
+config.front_end = "OpenGL"
 
 -- =========================================================
 -- ⌨️ 键位映射 (Keybindings) - 像 Tmux 一样使用

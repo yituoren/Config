@@ -11,7 +11,7 @@ layout {
         proportion 0.5
         proportion 0.66667
     }
-    default-column-width {}
+    default-column-width { proportion 0.5; }
 
     // 焦点高亮环
     // 颜色暂为固定值;到 matugen 步骤,可让 matugen 渲染一个含
@@ -19,7 +19,7 @@ layout {
     //   再在 config.kdl 里 include 进来 —— section 会自动合并。
     focus-ring {
         width 2
-        active-color "#0db7d4"
+        active-color "#00000000"
         inactive-color "#00000000"
     }
 
