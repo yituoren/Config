@@ -13,7 +13,7 @@ Agent-facing 简报。打开这个仓库新 session 时**先读这份再动手**
 - niri 合成器已替代 Hyprland 作日常使用
 - 壁纸 / Material You 取色 / 终端调色板的核心管线已自建,**不依赖 ii**
 - ii 的 quickshell shell 仍在 `quickshell/ii/`,作为**参考实现**留着;不再启动它
-- 自建 quickshell shell 尚未开工,主线计划见 `docs/TODO.md`
+- 自建 quickshell shell 在 `quickshell/mine/`:**Phase 0/1/2 完成**(骨架 + Niri 兼容层 + Theme),Phase 3 准备拆 Bar 模块(详见 `docs/TODO.md`)
 
 ---
 
@@ -38,7 +38,13 @@ Agent-facing 简报。打开这个仓库新 session 时**先读这份再动手**
 ├── niri/                # niri 全部配置(主要工作目录)
 │   ├── binds.kdl  rules.kdl  layout.kdl  startup.kdl
 │   ├── environment.kdl  input.kdl  outputs.kdl  config.kdl
-├── quickshell/ii/       # ii 的 qs shell,参考用,不启动
+├── quickshell/
+│   ├── ii/              # ii 的 qs shell,参考用,不启动
+│   └── mine/            # 自建 shell(进行中)
+│       ├── shell.qml    # 入口
+│       └── services/
+│           ├── Niri.qml    # niri 事件流 + 状态(替代 HyprlandData.qml)
+│           └── Theme.qml   # matugen colors.json,IPC 触发 reload
 ├── scripts/             # 用户脚本(进 PATH 走 ~/.local/bin/<name> 软链)
 │   └── setwall.sh       # 壁纸 + matugen + OSC 广播 一气呵成
 ├── wezterm/             # wezterm.lua(整目录链)
@@ -74,6 +80,12 @@ Agent-facing 简报。打开这个仓库新 session 时**先读这份再动手**
    ├─ wezterm.lua 启动时:wezterm.json_parse(colors.json) → 设置 config.colors
    │   (这一步保证 fuzzel 直接 spawn wezterm 跑 yazi 时也能拿到 matugen 色)
    └─ kitty:目前没接 matugen,靠终端响应 OSC 4/10/11 在 shell 启动后被 zshrc 改色
+
+qs shell(quickshell/mine):
+   └─ setwall 跑完后 `qs -c mine ipc call theme reload`
+       → Theme.qml(Singleton)Process { cat colors.json } → StdioCollector → JSON.parse
+       → root.colors 整体替换 → 所有 binding 重算
+       注:**没用 FileView.watchChanges**(matugen 原子写,inotify 失效),走显式 IPC
 ```
 
 **ANSI 16 色映射**(`scripts/setwall.sh`、`.zshrc`、`wezterm/wezterm.lua` 里**三份**,改一处要同步):
@@ -134,6 +146,8 @@ Agent-facing 简报。打开这个仓库新 session 时**先读这份再动手**
 - **eza alias 必须 `--icons=auto`**,不能裸 `--icons` —— `_eza` 补全会把后续路径当成 `--icons` 的取值,TAB 路径补全坏掉
 - **`.zshrc` 的 OSC 调色板块必须在 p10k instant prompt 之前** —— 否则 instant prompt 吞掉 stdout,kitty 起手没色,要等 setwall 广播才对
 - **zsh `out+="...${s}"` 拼接,若 `${s}` 以 `\` 结尾,`\` 会被吞** —— 所以 OSC 终止符必须用 BEL(`\a`)而不是 ST(`ESC \`)。bash 没这毛病,setwall.sh 仍用 ST 没事
+- **QML property 名不能以 `on<Capital>` 开头** —— `on` + 大写字母被 QML 当成 signal handler。Material You 的 `on_background` 这种 token 在 QML 里用 `Theme.colors.on_background`(map 形式)而不是 `Theme.onBackground`(property 形式)
+- **Claude Edit 工具改 `quickshell/mine/**` 下的 QML 后必须紧跟 `touch <file>`** —— Edit 走原子替换,quickshell 的 inotify 监听挂在老 inode 上接不到事件。`touch` 不换 inode,补一个 MODIFY 事件触发热重载。用户自己用编辑器保存能 reload,Edit 工具不行
 - **wezterm `front_end = "WebGpu"`** 在 niri/wlroots 上会黑屏无输入,固定 `OpenGL`
 - **matugen `[templates.zed]`** 已注释 —— 模板文件 `templates/zed/matugen.json` 不存在,留着会让 matugen 4.x 整次运行 abort
 - **kitty `kitty <cmd>`** 直接接命令可以,但 wezterm 必须 `wezterm start -- <cmd>` 或 `wezterm -e <cmd>` —— fuzzel `terminal=` 写法要注意

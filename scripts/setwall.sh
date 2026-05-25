@@ -59,4 +59,8 @@ if [[ -f "$COLORS_JSON" ]] && command -v jq >/dev/null; then
     done
 fi
 
+# 4. 戳一下自建 qs shell 的 Theme 服务,让它重读 colors.json
+#    qs 没在跑就 silently 跳过
+qs -c mine ipc call theme reload 2>/dev/null || true
+
 echo "wallpaper set: $img"

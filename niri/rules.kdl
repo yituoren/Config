@@ -79,13 +79,10 @@ layer-rule {
     }
 }
 
-// 图层规则模板  (★等你自己的 quickshell shell 建好后启用)
-// match namespace 要填你 shell 的 layer-shell namespace。
-//
-// layer-rule {
-//     match namespace="^quickshell-bar$"
-//     match namespace="^quickshell-sidebar.*$"
-//     background-effect {
-//         blur true
-//     }
-// }
+// 自建 qs shell:所有 mine-* namespace 的 layer 都加模糊
+layer-rule {
+    match namespace="^mine-.*$"
+    background-effect {
+        blur true
+    }
+}

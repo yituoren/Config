@@ -113,69 +113,58 @@ pacman -Qi <包名>
 
 ## 工具链 / 开发循环
 
-- [ ] 项目放在 `~/.dotfiles/quickshell/mine/`(随便起个名),软链到 `~/.config/quickshell/mine/`
-- [ ] `shell.qml` 作为入口,跟 ii 的 `shell.qml` 同形(`ShellRoot { PanelLoader { ... } }`)
-- [ ] 开发态运行:`qs -p ~/.config/quickshell/mine`(改文件即热重载,~1s)
+- [x] 项目放在 `~/.dotfiles/quickshell/mine/`,软链到 `~/.config/quickshell/mine/`
+- [x] `shell.qml` 作为入口
+- [x] 开发态运行:`qs -p ~/.config/quickshell/mine`(改文件即热重载,~1s)
+  - **坑**:Claude Edit 工具走原子替换会让 inotify 失效,改完要 `touch <file>` 触发 reload。用户自己用编辑器保存正常 reload。
 - [ ] 早开 logging:`qs -p ... 2>&1 | tee /tmp/qs.log`,QML 报错才找得到
-- [ ] 一开始就把 git 历史接上,出现"昨天还好今天瞎了"时能 `git diff`
+- [x] git 历史接上(niri 分支)
 
-## 阶段 0 —— 骨架(目标:屏幕上能看到一个矩形)
+## ✅ 阶段 0 —— 骨架(完成)
 
-- [ ] 写最小 `shell.qml`:`ShellRoot { PanelWindow { anchors.top: true; height: 32; color: "#80000000" } }`
-- [ ] 跑起来,看到屏幕顶端一条半透明黑条 → 你已经在 niri 上跑通 qs 了
-- [ ] niri 给你的 namespace 加 layer-rule:
-    ```kdl
-    layer-rule {
-        match namespace="^mine-.*$"
-        background-effect { blur true }
-    }
-    ```
-    在 PanelWindow 里 `WlrLayershell.namespace: "mine-bar"` 之类设定 namespace,让 blur 能 match 到。
-- [ ] 第一个能跑的 IPC:`IpcHandler { target: "test"; function ping(): void { console.log("hi") } }`
-      → 在外部跑 `qs ipc call test ping`,日志里看到 "hi"。打通了你后面替换 niri 快捷键就靠这个。
+- [x] `shell.qml`:32px 顶部条,namespace `mine-bar`,显示一行调试文字
+- [x] niri `rules.kdl` 加了 `layer-rule { match namespace="^mine-.*$"; background-effect { blur true } }`
+- [x] IPC 通了:`qs -c mine ipc call test ping` → 日志 `hi from mine`
+- [x] 热重载链路通(用户编辑器保存即生效;Claude Edit 后跟 `touch`)
 
-## 阶段 1 —— 兼容层(最硬的活,先难后易)
+## ✅ 阶段 1 —— Niri 兼容层(最小可用版完成)
 
-写 `services/Niri.qml`,定位等同于 ii 的 `HyprlandData.qml`,**对外接口**尽量贴近(后面抄 ii 模块时改动小)。
+`services/Niri.qml` 已写,长连接 `niri msg --json event-stream`,事件按行 JSON parse。
 
-- [ ] 暴露响应式属性:
-    - `windows: list<var>`(每项至少含 id/title/app_id/workspace_id/is_focused)
-    - `workspaces: list<var>`(id/idx/name/output/is_active/is_focused)
-    - `focusedWindowId: int`
-    - `activeWorkspaceId: int`
-    - `outputs: list<var>`
-- [ ] 数据来源(冷启动用):
-    - `niri msg --json windows`
-    - `niri msg --json workspaces`
-    - `niri msg --json focused-output`
-- [ ] 事件订阅(热更新用):后台跑 `niri msg event-stream --json`,用 `Quickshell.Io.Process` + `SplitParser{ splitMarker: "\n" }` 接收每行 JSON,按事件类型 patch 上面属性
-    - 不要每次事件来都重新拉一遍全量,niri 已经把变化都打在事件里了
-- [ ] 暴露 dispatch 方法封装:`function focusWorkspace(id) { Process { command: ["niri", "msg", "action", "focus-workspace", id.toString()] }.startDetached() }`
-- [ ] 同样封装:`closeWindow / focusWindow / moveWindowToWorkspace / spawn`(几个 ii overview 一定要用的)
-- [ ] **测试通过的标准**:写个临时小 panel,把 `Niri.workspaces` 渲染成一排小方块,active 高亮 —— 切工作区时实时变 → 兼容层就活了
+- [x] 响应式属性:`workspaces` / `windows` / `focusedWindowId` / `activeWorkspaceId` / `overviewOpen` / `configOk` / `ready`
+- [x] 快照事件:`WorkspacesChanged` / `WindowsChanged` 一上线就有全量状态
+- [x] 增量事件:`WorkspaceActivated` / `WindowFocusChanged` / `WindowOpenedOrChanged` / `WindowClosed` / `OverviewOpenedOrClosed` / `ConfigLoaded`
+- [x] 高频静默事件:`WindowFocusTimestampChanged` 等放 case fall-through 不打日志
+- [x] 调试 IPC:`qs -c mine ipc call niri dump` 打当前状态
+- [x] 验证通过:bar 显示的 `ws X · N wins · title` 切工作区/聚焦/开关窗口都实时变
 
-> 这一步如果做扎实,后面所有 UI 模块的成本都会显著降低。
+剩余(本阶段后期补,不阻塞 Phase 3):
+- [ ] dispatch 方法封装(`focusWorkspace` / `closeWindow` / `moveWindowToWorkspace` / `spawn`)—— 写 Bar 模块时按需补
+- [ ] `outputs` 数组(目前没暴露,需要时从 `niri msg --json focused-output` 拉)
+- [ ] `WindowLayoutsChanged` / `WindowUrgencyChanged` 等 Overview 模块要用的事件
 
-## 阶段 2 —— 主题管线(matugen → QML)
+## ✅ 阶段 2 —— Theme 管线(完成)
 
-- [ ] 在 `~/.config/matugen/config.toml` 加一个模板,渲染 QML 友好的颜色文件(JSON 即可):
-    ```toml
-    [templates.qml_colors]
-    input_path  = '~/.config/matugen/templates/qml/colors.json'
-    output_path = '~/.local/state/quickshell/mine/colors.json'
-    ```
-- [ ] 写 `services/Theme.qml` 单例,`FileView { path: ".../colors.json"; onContentChanged: parse() }`,暴露 `primary` / `surface` / `onSurface` 等
-- [ ] 所有模块**只**通过 `Theme.xxx` 拿颜色,**不允许写死 hex**(只有需要 fallback 时写)
-- [ ] 换壁纸 → matugen 重新生成 → FileView 检测到变化 → 整个 shell 颜色滚动刷新。这是 ii 给你的"魔法感"的源头
+`services/Theme.qml` 已写,接 matugen → setwall → IPC 的链。
 
-## 阶段 3 —— 核心三件套(决定能否日用)
+- [x] 沿用现有 `[templates.m3colors]` 输出的 `~/.local/state/quickshell/user/generated/colors.json`,不再加新模板
+- [x] Theme 暴露完整的 49 个 Material You token,**用 `Theme.colors.<key>` map 形式访问**(避开 QML `on<Cap>` 命名禁忌)
+- [x] 触发机制:**不用 `FileView.watchChanges`**(matugen 原子写让 inotify 失效),改用 `setwall.sh` 显式调 `qs -c mine ipc call theme reload`
+- [x] 启动 / 重载链:`Component.onCompleted` 或 IPC → `Process { cat }` 读文件 → `StdioCollector.onStreamFinished` → `JSON.parse` → `root.colors = c`(整体替换触发 colorsChanged)→ 所有 binding 重算
+- [x] shell.qml 已切换到 `Theme.colors.surface_container` / `on_surface` / `primary`,setwall 换壁纸时实时刷新
+
+约定:其它模块**不许写死 hex**,fallback 也都集中在 Theme.qml 的初值里。
+
+## ⏳ 阶段 3 —— 核心三件套(下一站:Bar)
 
 按这个顺序,**不要并行做**。每个模块做到"能用"就停,polish 留到阶段 5。
 
-1. **Bar** —— 状态栏
-    - [ ] 工作区指示器:从 `Niri.workspaces` 渲染,点击调 `Niri.focusWorkspace(id)`
-    - [ ] 时钟:`services/DateTime.qml`(ii 原版可直接拿)
-    - [ ] 系统托盘:`Quickshell.Services.SystemTray.SystemTrayItem`(qs 内置,跟合成器无关)
+1. **Bar** —— 状态栏(**当前 shell.qml 里的简易条要拆出来变正经模块**)
+    - [ ] 把 bar 从 `shell.qml` 拆到 `modules/bar/Bar.qml`,shell.qml 只 `Bar {}`
+    - [ ] 工作区指示器:从 `Niri.workspaces` 渲染一排,active 高亮,点击调用补的 `Niri.focusWorkspace(id)`
+    - [ ] 焦点窗口 title(已 PoC 过,搬进 Bar.qml)
+    - [ ] 时钟:`services/DateTime.qml`(ii 原版可抄)
+    - [ ] 系统托盘:`Quickshell.Services.SystemTray.SystemTrayItem`(qs 内置)
     - [ ] 音量/电量指示:ii 的 `services/Audio.qml` / `Battery.qml` 直接抄
     - 验收:能完全替代你脑中的"上面那一条"
 
@@ -263,9 +252,9 @@ shell 自托管之后:
 
 ## 时间预期(诚实版)
 
-- 阶段 0 + 1:**1~2 天**(兼容层是最难的,做对了后面顺)
-- 阶段 2:**半天**
-- 阶段 3:**3~5 天**(三件套,Bar 最快、Overview 最磨人)
+- 阶段 0 + 1:**1~2 天**(兼容层是最难的,做对了后面顺) — ✅
+- 阶段 2:**半天** — ✅
+- 阶段 3:**3~5 天**(三件套,Bar 最快、Overview 最磨人) — ⏳ 下一步
 - 阶段 4:**每个模块半天到 1 天,挑用得上的做**
 - 阶段 5:**贯穿始终,持续 polish**
 
