@@ -2,6 +2,10 @@
 // 注意:environment {} 的值是字面字符串,不做 $HOME / $VAR 展开。
 
 environment {
+    // PATH:补 ~/.local/bin —— niri 默认 PATH 不带它,导致 spawn 跑不到用户二进制
+    // (zed/setwall 等都装在那里)。值是字面字符串,要写绝对路径。
+    PATH "/home/yituoren/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin"
+
     // 输入法 fcitx5
     QT_IM_MODULE "fcitx"
     XMODIFIERS "@im=fcitx"

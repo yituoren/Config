@@ -13,10 +13,11 @@ binds {
 
     // ---- 应用启动 ---------------------------------------------------------
     // ★ 原来每个都用 launch_first_available.sh 列一长串候选,已精简为单条命令。
-    Mod+Return hotkey-overlay-title="终端"   { spawn "kitty"; }
-    Mod+T      hotkey-overlay-title="终端"   { spawn "wezterm"; }
+    Mod+Return hotkey-overlay-title="终端"   { spawn "wezterm"; }
+    Mod+T      hotkey-overlay-title="终端"   { spawn "kitty"; }
     Mod+W      hotkey-overlay-title="浏览器" { spawn "google-chrome-stable"; }
-    Mod+E      hotkey-overlay-title="文件管理器" { spawn "nautilus"; }
+    // yazi 是 TUI,要套在终端里;--class yazi 让 niri 规则按 app-id 匹配
+    Mod+E      hotkey-overlay-title="文件管理器" { spawn "wezterm" "start" "--class" "yazi" "--" "yazi"; }
     Mod+C      hotkey-overlay-title="编辑器" { spawn "zed"; }     // 来自 custom/keybinds.conf
 
     // ---- 窗口操作 ---------------------------------------------------------

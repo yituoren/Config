@@ -1,3 +1,34 @@
+# Apply matugen-generated terminal palette (直接读 colors.json,发 OSC 4/10/11/12)
+# Material You → ANSI 16 映射跟 ~/.dotfiles/scripts/setwall.sh 一致。
+# ★必须在 p10k instant prompt **之前**:instant prompt 会吞掉 .zshrc 期间的 stdout,
+#  放后面 kitty 收不到 OSC,颜色就要等下次 setwall 才对。
+() {
+    local cf=~/.local/state/quickshell/user/generated/colors.json
+    [[ -f $cf ]] && (( $+commands[jq] )) || return
+    local -a c
+    c=( "${(@f)$(jq -r '
+        .background, .on_background, .primary,
+        (.surface_container_lowest // .background),
+        .error, .tertiary, .secondary, .primary,
+        .tertiary_container, .primary_container, .on_surface,
+        (.surface_container_low // .surface),
+        .error_container,
+        (.on_tertiary_container // .tertiary),
+        (.on_secondary_container // .secondary),
+        (.on_primary_container // .primary),
+        (.tertiary_fixed // .tertiary),
+        (.primary_fixed // .primary),
+        (.inverse_surface // .on_background)
+    ' $cf)}" )
+    # c[1]=bg c[2]=fg c[3]=cursor c[4..19]=ANSI 0..15
+    # ★ OSC 终止用 BEL(\a),不用 ST(ESC \) —— zsh 字符串拼接会吞末尾的 \,
+    #   导致前一段 OSC 没有合法终止,kitty 这种无 fallback 主题的终端就拿不到色
+    local e=$'\033' s=$'\a' out= i
+    for i in {0..15}; do out+="${e}]4;${i};${c[i+4]}${s}"; done
+    out+="${e}]10;${c[2]}${s}${e}]11;${c[1]}${s}${e}]12;${c[3]}${s}"
+    print -n -- "$out"
+}
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -165,7 +196,5 @@ stop_proxy() {
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export PATH=$HOME/.local/bin:$PATH
 
-# Apply matugen-generated terminal palette
-[[ -f ~/.dotfiles/zshrc.d/dots-hyprland.zsh ]] && source ~/.dotfiles/zshrc.d/dots-hyprland.zsh
-
-alias ls='eza --icons'
+# `--icons` 必须带值,否则 _eza 补全会把后续路径当成 --icons 的取值,导致 TAB 路径补全失效
+alias ls='eza --icons=auto'

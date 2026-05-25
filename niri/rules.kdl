@@ -64,22 +64,27 @@ window-rule {
 }
 
 // ============================================================
-// 图层规则模板  (★等你自己的 shell 建好后启用)
-// 对应原 rules.conf 里的 layerrule blur ... ignore_alpha ...
-// match namespace 要填你 shell 的 layer-shell namespace。
+// 图层规则
 // ============================================================
+
+// fuzzel 启动器:背景模糊
+// fuzzel 用的 layer-shell namespace 就叫 "launcher"(写死在源码里)
+// geometry-corner-radius 要跟 fuzzel.ini 里 [border] radius 一致,
+// 不然 niri 把模糊画到矩形边界,会在圆角外露出彩色直角
+layer-rule {
+    match namespace="^launcher$"
+    geometry-corner-radius 17
+    background-effect {
+        blur true
+    }
+}
+
+// 图层规则模板  (★等你自己的 quickshell shell 建好后启用)
+// match namespace 要填你 shell 的 layer-shell namespace。
 //
 // layer-rule {
 //     match namespace="^quickshell-bar$"
 //     match namespace="^quickshell-sidebar.*$"
-//     background-effect {
-//         blur true
-//     }
-// }
-//
-// fuzzel 启动器也可以加模糊:
-// layer-rule {
-//     match namespace="^launcher$"
 //     background-effect {
 //         blur true
 //     }

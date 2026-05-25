@@ -11,10 +11,57 @@ config.enable_wayland = true
 -- =========================================================
 
 -- 1. 配色方案
--- WezTerm 内置了 700+ 种配色，你可以在 https://wezfurlong.org/wezterm/colorschemes/index.html 查
--- 推荐：Catppuccin Mocha, Dracula, Tokyo Night, Nord, Gruvbox Dark Hard
-config.color_scheme = 'Tokyo Night (Gogh)'
--- config.color_scheme = 'Sequoia Moonlight'
+-- 直接读 matugen 的 colors.json,跟壁纸联动。读不到再退回到 Tokyo Night。
+-- 这样无论 wezterm 是从 shell 起还是被 fuzzel/.desktop 直接拉起来,色板都一致。
+local matugen_colors_path = os.getenv('HOME') .. '/.local/state/quickshell/user/generated/colors.json'
+
+local function load_matugen_colors(path)
+    local f = io.open(path, 'r')
+    if not f then return nil end
+    local content = f:read('*a'); f:close()
+    local ok, parsed = pcall(wezterm.json_parse, content)
+    if not ok or not parsed then return nil end
+    -- 映射跟 ~/.dotfiles/scripts/setwall.sh / .zshrc 里那套保持一致
+    return {
+        background = parsed.background,
+        foreground = parsed.on_background,
+        cursor_bg  = parsed.primary,
+        cursor_fg  = parsed.on_primary,
+        cursor_border = parsed.primary,
+        selection_bg = parsed.secondary_container,
+        selection_fg = parsed.on_secondary_container,
+        ansi = {
+            parsed.surface_container_lowest or parsed.background, -- black
+            parsed.error,                                          -- red
+            parsed.tertiary,                                       -- green
+            parsed.secondary,                                      -- yellow
+            parsed.primary,                                        -- blue
+            parsed.tertiary_container,                             -- magenta
+            parsed.primary_container,                              -- cyan
+            parsed.on_surface,                                     -- white
+        },
+        brights = {
+            parsed.surface_container_low or parsed.surface,        -- bright black
+            parsed.error_container,                                -- bright red
+            parsed.on_tertiary_container or parsed.tertiary,       -- bright green
+            parsed.on_secondary_container or parsed.secondary,     -- bright yellow
+            parsed.on_primary_container or parsed.primary,         -- bright blue
+            parsed.tertiary_fixed or parsed.tertiary,              -- bright magenta
+            parsed.primary_fixed or parsed.primary,                -- bright cyan
+            parsed.inverse_surface or parsed.on_background,        -- bright white
+        },
+    }
+end
+
+local matugen = load_matugen_colors(matugen_colors_path)
+if matugen then
+    config.colors = matugen
+else
+    config.color_scheme = 'Tokyo Night (Gogh)'
+end
+
+-- 让 wezterm 监听 colors.json 变化,setwall 换壁纸后自动重载
+wezterm.add_to_config_reload_watch_list(matugen_colors_path)
 
 -- 2. 字体设置
 -- 必须先安装 Nerd Fonts (sudo pacman -S ttf-jetbrains-mono-nerd)
@@ -22,13 +69,8 @@ config.font = wezterm.font('Maple Mono NF CN', { weight = 'Bold' })
 config.font_size = 12.5
 config.cell_width = 1.1
 
--- 3. 窗口背景透明与模糊
-config.window_background_opacity = 0.85 -- 0.0 到 1.0，越小越透
--- 注意：Arch Linux 下需要你的合成器 (如 Picom 或 Hyprland) 支持背景模糊
--- macOS 用户自带模糊，Linux 用户通常只需设置透明度
-config.colors = {
-    background = '#101010',
-}
+-- 3. 窗口背景透明
+config.window_background_opacity = 0.85 -- 0.0 到 1.0,越小越透
 
 -- 4. 去掉丑陋的顶部标题栏
 -- "RESIZE" 允许你拖动边缘调整大小，但没有标题栏

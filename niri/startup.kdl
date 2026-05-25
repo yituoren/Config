@@ -4,6 +4,11 @@
 // 输入法
 spawn-at-startup "fcitx5" "-d" "--replace"
 
+// 壁纸守护进程(awww 是 swww 的延续,CLI 同名 awww img / awww restore)
+spawn-at-startup "awww-daemon"
+// 开机自动恢复上次壁纸(awww-daemon 起来后再调,稍等一下)
+spawn-sh-at-startup "sleep 0.5 && awww restore"
+
 // 密钥环 / 空闲管理(hypridle 与合成器无关,可继续用)
 spawn-at-startup "gnome-keyring-daemon" "--start" "--components=secrets"
 spawn-at-startup "hypridle"
