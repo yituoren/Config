@@ -155,18 +155,31 @@ pacman -Qi <包名>
 
 约定:其它模块**不许写死 hex**,fallback 也都集中在 Theme.qml 的初值里。
 
-## ⏳ 阶段 3 —— 核心三件套(下一站:Bar)
+## ⏳ 阶段 3 —— 核心三件套
 
 按这个顺序,**不要并行做**。每个模块做到"能用"就停,polish 留到阶段 5。
 
-1. **Bar** —— 状态栏(**当前 shell.qml 里的简易条要拆出来变正经模块**)
-    - [ ] 把 bar 从 `shell.qml` 拆到 `modules/bar/Bar.qml`,shell.qml 只 `Bar {}`
-    - [ ] 工作区指示器:从 `Niri.workspaces` 渲染一排,active 高亮,点击调用补的 `Niri.focusWorkspace(id)`
-    - [ ] 焦点窗口 title(已 PoC 过,搬进 Bar.qml)
-    - [ ] 时钟:`services/DateTime.qml`(ii 原版可抄)
+1. **Bar** —— 状态栏(**主体完成 ✅,继续往里加 widget**)
+    - [x] 把 bar 从 `shell.qml` 拆到 `modules/bar/Bar.qml`,shell.qml 只 `Bar {}`
+    - [x] 整屏边框样式:PanelWindow 4 边 anchor + QtQuick.Shapes 的 ShapePath(OddEvenFill 外矩 - 内圆角矩)+ niri `layout.kdl` struts 让窗口让位 + 输入 mask 只在顶部接收 click,其它穿透
+    - [x] 工作区指示器(`widgets/WorkspaceIndicator.qml`):
+        - 跟 `Niri.workspaces` 联动,active 长药丸 / inactive 12×12 正圆点
+        - active 内塞 N 个**类别图标**(`categoryIcon(app_id)` 把 app_id 正则归到 终端 / 浏览器 / 文件管理 / 代理 / 编辑器 / 聊天 / 媒体 / 邮件 / 监控 / 游戏 / 等十几类)
+        - 单色矢量走 **Material Symbols Rounded** 字体的 ligature(`Text { text: "terminal" }`),不再用 Image + MultiEffect
+        - 焦点窗口背后浮"反相舱位"(`on_primary` 底 + 焦点 icon 改 `primary` 色),`x` 滑动 220ms Emphasized
+        - ws 切换:pill 宽 420ms / 高 380ms / 色 340ms,iconRow opacity 280ms
+        - 点 pill 切 ws(`Niri.focusWorkspace(id)`,内部映射到 idx)
+    - [x] 焦点窗口 title(`widgets/FocusedWindowTitle.qml`,居中,elide,Maple Mono NF CN Bold)
+    - [x] 时钟(`widgets/Clock.qml` + `services/DateTime.qml`,HH:mm,hover 时换日期+秒)
+    - [x] Arch Logo(`widgets/ArchLogo.qml`,Material Symbols Rounded 暂用 Nerd Font 占位,后面可换)
     - [ ] 系统托盘:`Quickshell.Services.SystemTray.SystemTrayItem`(qs 内置)
-    - [ ] 音量/电量指示:ii 的 `services/Audio.qml` / `Battery.qml` 直接抄
-    - 验收:能完全替代你脑中的"上面那一条"
+    - [ ] 音量 / 电量指示:ii 的 `services/Audio.qml` / `Battery.qml` 抄过来,加进 Bar 右侧
+    - [ ] 配合 ws 切换给 iconRow add/remove transition(动画当前是整体 opacity,可以更精细)
+    - 已知坑(踩过):
+        - QtQuick.Shapes 的 `mask: Region` 必须用 `item:` 引用 Item,不能直接 x/y/w/h
+        - `qs.X` auto-qmldir 只对 shell.qml 直接 import 的路径生效,子文件用到的子目录得在 shell.qml 末尾显式 import 引导(否则报 module not installed 的伪错)
+        - Maple Mono NF CN 走 `font.weight: Font.Bold` 时 fontconfig 把 700/800/900 都映射到 ExtraBold.ttf,要看出区别得用 `font.styleName: "Bold"` 直接选 cut
+    - 验收:**已能日用**(替代了 ii 那条 bar 的核心交互;还差托盘/音量/电量补完即可)
 
 2. **Launcher** —— 替代 fuzzel
     - [ ] `services/AppSearch.qml`:扫 `/usr/share/applications/**/*.desktop`,模糊匹配(ii 原版抄)
@@ -254,7 +267,7 @@ shell 自托管之后:
 
 - 阶段 0 + 1:**1~2 天**(兼容层是最难的,做对了后面顺) — ✅
 - 阶段 2:**半天** — ✅
-- 阶段 3:**3~5 天**(三件套,Bar 最快、Overview 最磨人) — ⏳ 下一步
+- 阶段 3:**3~5 天**(三件套,Bar 最快、Overview 最磨人) — ⏳ Bar 主体已完工 + 工作区图标/动画到位;系统托盘 / 音量 / 电量待补;Launcher / Overview 未开工
 - 阶段 4:**每个模块半天到 1 天,挑用得上的做**
 - 阶段 5:**贯穿始终,持续 polish**
 

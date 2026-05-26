@@ -133,6 +133,27 @@ Singleton {
         }
     }
 
+    // ------- dispatch(发出 niri action) -------
+    //
+    // niri 的 `action focus-workspace` 只认 idx / name,不认我们这边事件流给的 id。
+    // 所以传 ws.id 进来后,在本地 workspaces 里查 idx 再调命令。
+    // 单显示器场景下 idx 唯一;多显示器场景下 niri 会在当前 output 找,
+    // 暂时不实现"跨 output 切到指定 id"的复杂情况。
+    function focusWorkspace(id: int): void {
+        const ws = root.workspaces.find(w => w.id === id)
+        if (!ws) {
+            console.warn("Niri.focusWorkspace: id", id, "not found")
+            return
+        }
+        dispatcher.command = ["niri", "msg", "action", "focus-workspace", String(ws.idx)]
+        dispatcher.running = true
+    }
+
+    Process {
+        id: dispatcher
+        // command 在 focusWorkspace 等里赋值,running=true 触发一次
+    }
+
     // ------- 调试用:打印当前状态摘要(qs ipc call niri dump) -------
     IpcHandler {
         target: "niri"

@@ -1,78 +1,25 @@
 //@ pragma UseQApplication
 //@ pragma Env QS_NO_RELOAD_POPUP=1
 
-// Phase 1 验证版:Bar 显示从 niri 事件流取到的实时状态
-//   - 当前活动工作区 idx
-//   - 窗口总数
-//   - 焦点窗口的 title(超长截断)
-// 切工作区 / 切窗口 / 开关窗口都应该立刻在 bar 上看到变化。
+// shell.qml —— 入口。只装配模块,不写实际 UI。
 
-import QtQuick
 import Quickshell
-import Quickshell.Wayland
 import Quickshell.Io
+import qs.modules.bar
+// 显式 import 这些子目录是为了让 qs 在 shell 启动时自动建 qmldir 索引。
+// 不写在这里,虽然 Bar.qml 自己也 import 它们,但 qs 不会"自下而上"建索引,
+// 子文件就会拿到 "module not installed"。
 import qs.services
+import qs.modules.bar.widgets
 
 ShellRoot {
-    // 每块屏幕一个 bar 实例
+    // 每块屏幕一个 Bar(modelData 由 Variants 注入,Bar.qml 内部声明 required)
     Variants {
         model: Quickshell.screens
-
-        PanelWindow {
-            id: bar
-            required property var modelData
-            screen: modelData
-
-            WlrLayershell.namespace: "mine-bar"
-            WlrLayershell.layer: WlrLayer.Top
-
-            anchors {
-                top: true
-                left: true
-                right: true
-            }
-            implicitHeight: 32
-
-            // 0.65 alpha 的 surface_container —— niri 的 background-effect blur 撑视觉
-            color: {
-                const c = Qt.color(Theme.colors.surface_container)
-                return Qt.rgba(c.r, c.g, c.b, 0.65)
-            }
-
-            Row {
-                anchors.centerIn: parent
-                spacing: 16
-
-                Text {
-                    text: Niri.ready
-                          ? `ws ${Niri.activeWorkspaceId}  ·  ${Niri.windows.length} wins  ·  ${overviewTag}${focusedTitle}`
-                          : "Niri: connecting..."
-                    color: Theme.colors.on_surface
-                    font.family: "Maple Mono NF CN"
-                    font.pixelSize: 14
-
-                    readonly property var focusedWindow: Niri.windows.find(w => w.id === Niri.focusedWindowId)
-                    readonly property string focusedTitle: {
-                        if (!focusedWindow) return "(no focus)"
-                        const t = focusedWindow.title ?? ""
-                        return t.length > 60 ? t.slice(0, 60) + "…" : t
-                    }
-                    readonly property string overviewTag: Niri.overviewOpen ? "[overview]  " : ""
-                }
-
-                // 一个小色块,纯演示 Theme.primary 跟壁纸联动
-                Rectangle {
-                    width: 14
-                    height: 14
-                    radius: 4
-                    color: Theme.colors.primary
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
-        }
+        Bar {}
     }
 
-    // 测试 ipc
+    // 测试 ipc:`qs -c mine ipc call test ping`
     IpcHandler {
         target: "test"
         function ping(): void { console.log("hi from mine") }

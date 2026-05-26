@@ -80,9 +80,22 @@ layer-rule {
 }
 
 // 自建 qs shell:所有 mine-* namespace 的 layer 都加模糊
+// geometry-corner-radius 必须跟 qs 里画的 Rectangle.radius 一致,否则模糊会从圆角外泄出彩色直角
 layer-rule {
     match namespace="^mine-.*$"
+    geometry-corner-radius 10
     background-effect {
         blur true
+    }
+}
+
+// Bar 是整屏边框样式 —— layer 占满整屏,形状由 qs 内部 Shape 画。
+// 因为 layer 横跨整屏,niri 的 background-effect blur 会把"中间没画的空洞"区域也算
+// 进模糊范围,导致整屏看起来都被模糊。所以这里关掉 blur,边框靠纯不透明色立住。
+layer-rule {
+    match namespace="^mine-bar$"
+    geometry-corner-radius 0
+    background-effect {
+        blur false
     }
 }

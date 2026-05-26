@@ -13,7 +13,7 @@ Agent-facing 简报。打开这个仓库新 session 时**先读这份再动手**
 - niri 合成器已替代 Hyprland 作日常使用
 - 壁纸 / Material You 取色 / 终端调色板的核心管线已自建,**不依赖 ii**
 - ii 的 quickshell shell 仍在 `quickshell/ii/`,作为**参考实现**留着;不再启动它
-- 自建 quickshell shell 在 `quickshell/mine/`:**Phase 0/1/2 完成**(骨架 + Niri 兼容层 + Theme),Phase 3 准备拆 Bar 模块(详见 `docs/TODO.md`)
+- 自建 quickshell shell 在 `quickshell/mine/`:**Phase 0/1/2/3-Bar 主体完成**(骨架 + Niri 兼容层 + Theme + 整屏边框 bar + 工作区指示器/类别图标/焦点高亮舱位/动画)。剩余:系统托盘 / 音量 / 电量 → Launcher → Overview(详见 `docs/TODO.md`)
 
 ---
 
@@ -41,10 +41,18 @@ Agent-facing 简报。打开这个仓库新 session 时**先读这份再动手**
 ├── quickshell/
 │   ├── ii/              # ii 的 qs shell,参考用,不启动
 │   └── mine/            # 自建 shell(进行中)
-│       ├── shell.qml    # 入口
-│       └── services/
-│           ├── Niri.qml    # niri 事件流 + 状态(替代 HyprlandData.qml)
-│           └── Theme.qml   # matugen colors.json,IPC 触发 reload
+│       ├── shell.qml    # 入口,Variants { Bar {} } + 显式 import 所有 qs.X 子模块(qmldir 引导)
+│       ├── services/
+│       │   ├── Niri.qml      # niri 事件流 + 响应式状态 + Niri.focusWorkspace 等 dispatch
+│       │   ├── Theme.qml     # matugen colors.json,IPC 触发 reload
+│       │   └── DateTime.qml  # 全局 1s tick 单例,Clock/Calendar 共用
+│       └── modules/bar/
+│           ├── Bar.qml       # 整屏边框 + 顶部 bar 内容容器
+│           └── widgets/
+│               ├── ArchLogo.qml
+│               ├── WorkspaceIndicator.qml  # 类别图标 + 焦点反相舱位 + 动画
+│               ├── FocusedWindowTitle.qml
+│               └── Clock.qml
 ├── scripts/             # 用户脚本(进 PATH 走 ~/.local/bin/<name> 软链)
 │   └── setwall.sh       # 壁纸 + matugen + OSC 广播 一气呵成
 ├── wezterm/             # wezterm.lua(整目录链)
@@ -136,6 +144,8 @@ qs shell(quickshell/mine):
     - 不展开 `$HOME` / `$VAR`,要写绝对路径
 - **`rules.kdl` 全局 window-rule**:`geometry-corner-radius 18 + clip-to-geometry true + background-effect blur`
 - **`rules.kdl` 的 layer-rule**:`namespace="^launcher$"` 已启用 fuzzel 模糊,**`geometry-corner-radius 17` 必须跟 `fuzzel.ini` 的 `[border] radius` 一致**,否则角外露彩色直角
+- **`rules.kdl` `^mine-.*$` layer-rule + `^mine-bar$` 覆盖**:qs bar 是整屏 layer,bar 这条**必须**显式 `geometry-corner-radius 0` + `background-effect { blur false }` —— 否则 niri 把空洞(中间 transparent 区域)的桌面也卷进模糊,整桌面变糊
+- **`layout.kdl` `struts { top 44; left 8; right 8; bottom 8 }`** —— 给 qs bar 整屏边框让位。**struts 跟 `Bar.qml` 里 `barHeight` / `sideFrame` 必须严格对应**,改 qs 那边的数同步改这里(qs 4-边 anchor 时 layer-shell exclusive-zone 失效,只能靠 struts)
 - **`layout.kdl` `default-column-width { proportion 0.5; }`** —— 新窗口默认半宽
 - **`binds.kdl` 终端类绑定** 默认 spawn 二进制名(不写绝对路径,靠 environment.kdl 的 PATH 解析)
 
@@ -153,6 +163,10 @@ qs shell(quickshell/mine):
 - **kitty `kitty <cmd>`** 直接接命令可以,但 wezterm 必须 `wezterm start -- <cmd>` 或 `wezterm -e <cmd>` —— fuzzel `terminal=` 写法要注意
 - **`fuzzel` 的 layer-shell namespace 是 `launcher`,不是 `fuzzel`**(源码硬编码)
 - **`awww` 是 `swww` 的改名延续**,`Provides: swww`,CLI 命令 `awww img / awww-daemon / awww restore`
+- **qs 的 `qs.X` auto-qmldir 必须在 shell.qml 里显式 import** —— 子文件再 import 同一路径不会"自下而上"建索引,会报 `module "qs.modules.bar.widgets" is not installed`(伪装成上游 import 缺失,误导)。新建 services / widgets 子目录后,**第一时间在 shell.qml 末尾加一行 `import qs.X.Y`** 即可,即使 shell.qml 自己用不到
+- **Quickshell `Region` 输入 mask 必须用 `item:` 引用 Item**,不能裸写 `Region { x: 0; y: 0; ... }` —— 即便 qmltypes 里有这些属性,实际解析会失败,错误冒泡成上游 `qs.X` 模块"不存在"
+- **Maple Mono NF CN 走 `font.weight: Font.Bold/ExtraBold/Black`(整数 700/800/900)在 fontconfig 这里全被映射到 ExtraBold.ttf**,改 weight 数字看不出区别。要精确选 cut(尤其想看到真正的 Bold)必须用 **`font.styleName: "Bold"`**(或 "Medium" / "SemiBold" / "ExtraBold" / ...)绕开 weight 近似匹配
+- **`MultiEffect`(`QtQuick.Effects`)给图标做单色重绘**:`colorization: 1.0 + colorizationColor: <c>` 把原图当 alpha mask 重染,比 Qt5Compat `ColorOverlay` 现代且便宜。用作 `source` 的原图要 `visible: false` 让 MultiEffect 接管渲染。当前 qs bar 已弃用,改走 Material Symbols Rounded 字体 ligature(更轻,字号无关)
 
 ---
 

@@ -22,7 +22,4 @@ input {
 
     mouse {}
 
-    // mouse behavior
-    focus-follows-mouse
-    warp-mouse-to-focus
 }

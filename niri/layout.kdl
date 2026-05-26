@@ -37,8 +37,16 @@ layout {
         color "#00000040"
     }
 
-    // 屏幕四边间距
-    struts {}
+    // 屏幕四边间距 —— 给 qs 的边框 bar 留位:
+    //   top = bar 高度(qs Bar.qml bar.barHeight)
+    //   左/右/下 = 细边框厚度(qs Bar.qml bar.sideFrame)
+    // 注意:qs 的 PanelWindow 由于 4 边都 anchor、exclusive-zone 失效,只能靠这里 reserve。
+    struts {
+        top 44
+        left 8
+        right 8
+        bottom 8
+    }
 }
 
 // 模糊
