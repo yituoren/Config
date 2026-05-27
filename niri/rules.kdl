@@ -79,23 +79,23 @@ layer-rule {
     }
 }
 
-// 自建 qs shell:所有 mine-* namespace 的 layer 都加模糊
-// geometry-corner-radius 必须跟 qs 里画的 Rectangle.radius 一致,否则模糊会从圆角外泄出彩色直角
+// 自建 qs shell:全屏 ContentWindow,namespace = `mine-shell`
+// 不设 blur / corner-radius —— Blob SDF 自己渲染形状(包括圆角),niri 别插手
+// 注意 ★ 不要给这个 layer 加 background-effect blur:mine-shell 是全屏 PanelWindow,
+//   bar/popup 之外全是 RGBA 透明像素,niri 的 blur 会把整屏 wallpaper + 窗口糊一遍
 layer-rule {
-    match namespace="^mine-.*$"
-    geometry-corner-radius 10
-    background-effect {
-        blur true
-    }
+    match namespace="^mine-shell$"
 }
 
-// Bar 是整屏边框样式 —— layer 占满整屏,形状由 qs 内部 Shape 画。
-// 因为 layer 横跨整屏,niri 的 background-effect blur 会把"中间没画的空洞"区域也算
-// 进模糊范围,导致整屏看起来都被模糊。所以这里关掉 blur,边框靠纯不透明色立住。
+// BlurPanel:专门做 dashboard popup 模糊的小 layer,只覆盖 popup 几何。
+// niri 的 background-effect blur 在 layer-shell 上只采到 background 层(壁纸),
+// 看不到正常窗口 —— xray 在我们这版 niri 上也不生效;这里只能糊壁纸,可接受。
+// geometry-corner-radius 16:跟 ContentWindow.barRadius 一致,blur 矩形切成圆角 popup 形,
+// 跟 SDF popup 完全贴合,边缘不会露出方角 blur
 layer-rule {
-    match namespace="^mine-bar$"
-    geometry-corner-radius 0
+    match namespace="^mine-blur$"
+    geometry-corner-radius 16
     background-effect {
-        blur false
+        blur true
     }
 }

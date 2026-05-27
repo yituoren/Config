@@ -1,1 +1,4 @@
 .claude/
+
+# Caelestia.Blobs plugin 的 CMake 构建输出
+caelestia-blobs/build/

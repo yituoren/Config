@@ -18,6 +18,11 @@ environment {
     QT_QPA_PLATFORMTHEME "kde"
     XDG_MENU_PREFIX "plasma-"
 
+    // 自定义 QML 模块搜索路径(自编 Caelestia.Blobs SDF plugin 装在用户级)
+    // Qt 默认只搜索 /usr/lib/qt6/qml,装到 ~/.local/share/qt6/qml/ 必须显式声明
+    QML_IMPORT_PATH "/home/yituoren/.local/share/qt6/qml"
+    QML2_IMPORT_PATH "/home/yituoren/.local/share/qt6/qml"
+
     // 杂项
     ELECTRON_OZONE_PLATFORM_HINT "auto"
     WEBKIT_DISABLE_COMPOSITING_MODE "1"

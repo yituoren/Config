@@ -155,123 +155,161 @@ pacman -Qi <包名>
 
 约定:其它模块**不许写死 hex**,fallback 也都集中在 Theme.qml 的初值里。
 
-## ⏳ 阶段 3 —— 核心三件套
+## ✅ 阶段 3 —— Bar + Popup 系统(完成)
 
-按这个顺序,**不要并行做**。每个模块做到"能用"就停,polish 留到阶段 5。
+### Bar widgets ✅
+- ArchLogo / WorkspaceIndicator(类别图标 + 焦点反相舱位 + 动画) / FocusedWindowTitle / Clock
+- SystemTrayIndicator(StatusNotifierItem,左键 activate / 右键 secondaryActivate / 滚轮 scroll)
+- WifiIndicator / BluetoothIndicator / VolumeIndicator / BatteryIndicator / PowerButton
 
-1. **Bar** —— 状态栏(**主体完成 ✅,继续往里加 widget**)
-    - [x] 把 bar 从 `shell.qml` 拆到 `modules/bar/Bar.qml`,shell.qml 只 `Bar {}`
-    - [x] 整屏边框样式:PanelWindow 4 边 anchor + QtQuick.Shapes 的 ShapePath(OddEvenFill 外矩 - 内圆角矩)+ niri `layout.kdl` struts 让窗口让位 + 输入 mask 只在顶部接收 click,其它穿透
-    - [x] 工作区指示器(`widgets/WorkspaceIndicator.qml`):
-        - 跟 `Niri.workspaces` 联动,active 长药丸 / inactive 12×12 正圆点
-        - active 内塞 N 个**类别图标**(`categoryIcon(app_id)` 把 app_id 正则归到 终端 / 浏览器 / 文件管理 / 代理 / 编辑器 / 聊天 / 媒体 / 邮件 / 监控 / 游戏 / 等十几类)
-        - 单色矢量走 **Material Symbols Rounded** 字体的 ligature(`Text { text: "terminal" }`),不再用 Image + MultiEffect
-        - 焦点窗口背后浮"反相舱位"(`on_primary` 底 + 焦点 icon 改 `primary` 色),`x` 滑动 220ms Emphasized
-        - ws 切换:pill 宽 420ms / 高 380ms / 色 340ms,iconRow opacity 280ms
-        - 点 pill 切 ws(`Niri.focusWorkspace(id)`,内部映射到 idx)
-    - [x] 焦点窗口 title(`widgets/FocusedWindowTitle.qml`,居中,elide,Maple Mono NF CN Bold)
-    - [x] 时钟(`widgets/Clock.qml` + `services/DateTime.qml`,HH:mm,hover 时换日期+秒)
-    - [x] Arch Logo(`widgets/ArchLogo.qml`,Material Symbols Rounded 暂用 Nerd Font 占位,后面可换)
-    - [ ] 系统托盘:`Quickshell.Services.SystemTray.SystemTrayItem`(qs 内置)
-    - [ ] 音量 / 电量指示:ii 的 `services/Audio.qml` / `Battery.qml` 抄过来,加进 Bar 右侧
-    - [ ] 配合 ws 切换给 iconRow add/remove transition(动画当前是整体 opacity,可以更精细)
-    - 已知坑(踩过):
-        - QtQuick.Shapes 的 `mask: Region` 必须用 `item:` 引用 Item,不能直接 x/y/w/h
-        - `qs.X` auto-qmldir 只对 shell.qml 直接 import 的路径生效,子文件用到的子目录得在 shell.qml 末尾显式 import 引导(否则报 module not installed 的伪错)
-        - Maple Mono NF CN 走 `font.weight: Font.Bold` 时 fontconfig 把 700/800/900 都映射到 ExtraBold.ttf,要看出区别得用 `font.styleName: "Bold"` 直接选 cut
-    - 验收:**已能日用**(替代了 ii 那条 bar 的核心交互;还差托盘/音量/电量补完即可)
+### SDF Blob 渲染层 ✅
+- `Caelestia.Blobs` C++ plugin 自编
+- ContentWindow 单 PanelWindow per screen 装 bar + popup,SDF cubic smin 把它们融合
+- popup 凹槽自动从 bar 形状里"挖"出来
 
-2. **Launcher** —— 替代 fuzzel
-    - [ ] `services/AppSearch.qml`:扫 `/usr/share/applications/**/*.desktop`,模糊匹配(ii 原版抄)
-    - [ ] UI:一个 PanelWindow,中间一个 TextField + ListView 展示结果
-    - [ ] IpcHandler 暴露 `launcher.toggle()`,niri `binds.kdl` 里 `Mod+Space { spawn-sh "qs ipc call launcher toggle"; }` 替换 fuzzel
-    - 验收:能完全替代 fuzzel,且看上去顺眼
+### Popup 系统 ✅
+- `PopupManager` Singleton:统一管几何 / 动画 / scrim / openInProgress
+- 7 个 popup:power(2×2 grid)/ wifi / bluetooth / volume / battery / tray / dashboard
+- 共用配置:`registry { width, heightFn, scaleFrom, duration, transparent }`
+- 切换 popup 平滑过渡(displayWidth/Height + animatedAnchorX 都带 Behavior)
+- popup 开时所有屏 mask=null,点别屏空白也关 popup
 
-3. **Overview** —— 工作区总览
-    - [ ] 每个工作区一格,格子内画该工作区的窗口缩略代理(用 `Niri.windows` 中该 ws 的窗口 list 渲染矩形即可,**不必真截图**)
-    - [ ] 点格子调 `Niri.focusWorkspace`,拖窗调 `Niri.moveWindowToWorkspace`
-    - [ ] 跟 launcher 共用一个 PanelWindow,合成 ii 那种"一键弹出工作区+应用"的统一面板
-    - 验收:Mod+Tab(或你自定义键)弹出能用
+### 中央 popup 框架 + Media tab ✅
+- Dashboard popup 880 wide,半屏高度,hover bar 中央 320 宽窄条触发(80ms 延迟)
+- 顶 4 tab(media / dashboard / weather / control),tab 间滑动下划线,记忆上次选中
+- BlurPanel 独立 layer 给 dashboard 做模糊底(只能糊壁纸,niri xray 限制)
+- 两段式开合:popup 开 → 慢一拍 → BlurPanel scale 0→1 600ms;关反过来 BlurPanel 先收 → 慢一拍 → popup 才开始收
+- SDF 顶 → 底渐变:`colorBottom` + `gradientTop/Bottom` uniforms 实现 popup 底部半透
+- **Media tab 完工**:
+    - 上排:vol pill / sink ▼ / player ▼(都是 dropdown 菜单)
+    - 下半:左侧文字面板(title/artist/album/歌词占位/进度条/控件)+ 右侧 280px 旋转光碟
+    - 光碟:`MultiEffect` 圆形 mask 把方形封面裁圆 + vinyl 黑底 + 中心钉 + 周围 32 根 cava 环形 halo(`Repeater + Rectangle` rotated 角度铺)
+    - 控件:shuffle / prev / 大圆 play-pause(primary 色)/ next / loop,disabled 状态走 opacity
+    - 进度条:`SliderBar` + `MediaPlayer.formatTime`,canSeek 时拖动改 position;Timer 60Hz 调 `positionChanged()` 强制重读 MPRIS
 
-> **到这里你的 shell 已经"能日用"。后面所有都是锦上添花。**
+### Cava 律动条 ✅
+- `Cava.qml` Singleton spawn cava 进程,raw ASCII 解析(framerate 60,32 bars)
+- 多消费者:`needBarViz`(bar 底层)/ `needMediaTab`(media tab 内)同时跑,都没需求就停
+- Bar 底律动条:popup 关时显示,跟 dashboard 同宽同居中,32 根均分填满,顶 `#000`(贴 bar)→ 中 primary → 尾 primary alpha 0
+- 静音(所有 value < 0.04)整层 500ms 淡出
 
-## 阶段 4 —— 周边模块(按用得多到少补)
+### 系统服务 ✅
+- `SystemStatus.qml`:电池 / WiFi / 蓝牙 / 音量 / 音频 sinks / 屏幕亮度(brightnessctl 内屏 + ddcutil 外屏 + 缓存 + debounce + 启动 prefetch)
+- `MediaPlayer.qml`:MPRIS 薄壳(list 过滤 / active 钉住 / artUrl YouTube 兜底 / formatTime)
 
-- [ ] OSD:音量/亮度调节时的弹出条 —— `services/Audio.qml` + 一个会自动淡出的 PanelWindow
-- [ ] 通知中心:`Quickshell.Services.Notifications`(qs 内置 freedesktop notification daemon)+ ii 的 popup UI
-- [ ] SidebarRight:wifi/蓝牙/音频/媒体控制集合面板 —— ii 内容最多的模块,慢慢抄
-- [ ] Polkit:`PolkitAgent {}`(qs 内置)+ 简单密码输入框,装完可以卸掉 `polkit-kde-agent`
-- [ ] Cheatsheet:Mod+/ 弹出快捷键列表(niri 自带一个但样式跟 shell 不统一)
-- [ ] WallpaperSelector:thumbnail 网格 + 切换时调 matugen
-- [ ] Dock(可选,你之前在 hyprland 上没怎么用)
+---
 
-## 阶段 5 —— "好看且丝滑"的那一层(决定主观体验)
+## ⏳ 阶段 3.5 —— 中央 popup 剩余 3 个 tab
 
-ii 给你的视觉冲击 80% 来自下面这些细节,**逐项打勾**:
+Dashboard popup 框架 + Media 完工。剩下:
+
+### Dashboard tab(主信息汇总)
+- [ ] 大日历(月视图,Material 3 风格)
+- [ ] 系统资源面板(CPU / RAM / 磁盘 / 网络 / 温度;ii 的 `Resources.qml` 抄)
+- [ ] 待办 / 提醒(可选,Toggl 或 Markdown TODO)
+
+### Weather tab
+- [ ] `services/Weather.qml`:geoclue 拿坐标 + 调天气 API(open-meteo 免费无 key 推荐)
+- [ ] 大图标(Material Symbols Rounded 的 `clear_day` / `cloudy` / `rainy` 等)+ 当前温度
+- [ ] 24h / 7d 预报横条(温度曲线 + 降水柱状)
+
+### Control tab(类似 macOS Control Center)
+- [ ] 快捷开关 grid:WiFi 切换 / 蓝牙切换 / 飞行模式 / 勿扰 / 暗色模式 / 蓝光滤镜(wlsunset)
+- [ ] 亮度全局 slider(选不同屏分别调,或单 slider 调全部内屏)
+- [ ] 音量主 slider + 输入设备选择(目前只有输出)
+
+### 媒体增强(给 Media tab)
+- [ ] **歌词服务** `services/Lyrics.qml`:
+    - 在线源 lrclib.net(免费,有同步 LRC),备用 NetEase Cloud API
+    - 缓存到 `~/.cache/quickshell-mine/lyrics/<artist>-<title>.lrc`
+    - 解析 `[mm:ss.xx] 歌词` 时间戳
+    - 暴露 `currentLine` / `prevLine` / `nextLine`(根据 player.position 派生)
+    - 接到 MediaTab 的 lyric 三行(目前是占位 ♪)
+- [ ] 媒体源选择:除 MPRIS 之外加 PipeWire stream 选择(浏览器音频没 MPRIS metadata 时也能调音量)
+
+---
+
+## ⏳ 阶段 4 —— Launcher / Overview / 其它
+
+### Launcher —— 替代 fuzzel
+- [ ] `services/AppSearch.qml`:扫 `/usr/share/applications/**/*.desktop`,模糊匹配
+- [ ] UI:`mine-shell` 内或独立 PanelWindow,TextField + ListView
+- [ ] IpcHandler `launcher.toggle()`,niri `binds.kdl` `Mod+Space` 改 `qs ipc call launcher toggle`
+- [ ] 拓展:emoji / 计算器 / 剪贴板历史(整合 cliphist)同样走这套
+- 验收:能完全替代 fuzzel,看上去顺眼
+
+### Overview —— 工作区总览
+- [ ] 每个工作区一格,格子内画该工作区窗口缩略(用 `Niri.windows` 渲染矩形,不真截图)
+- [ ] 点格子调 `Niri.focusWorkspace`;拖窗调 `Niri.moveWindowToWorkspace`
+- [ ] 跟 Launcher 共用 PanelWindow,合成"一键弹出工作区+应用"统一面板
+- 验收:Mod+Tab 弹出能用
+
+### 其它周边
+- [ ] OSD:音量 / 亮度调节时的弹出条(自动淡出 PanelWindow)
+- [ ] 通知中心:`Quickshell.Services.Notifications`(qs 内置 freedesktop notification daemon)+ ii 的 popup UI 抄
+- [ ] Polkit agent:`PolkitAgent {}`(qs 内置)+ 简单密码框,装完可以卸 `polkit-kde-agent`
+- [ ] Cheatsheet:Mod+/ 弹快捷键列表(niri 自带但样式不一致)
+- [ ] WallpaperSelector:thumbnail 网格 + 切换调 `setwall`
+
+## 阶段 5 —— polish / 视觉细节
+
+视觉冲击靠这些。已完成的部分打勾,剩下的随时补:
 
 ### 5.1 形与光
 
-- [ ] 所有面板 PanelWindow 半透明(背景 alpha ~0.65),靠 niri layer-rule 模糊撑底色
-- [ ] 圆角:`Rectangle.radius` + 子内容用 `clip: true` 或 `OpacityMask` 裁
-- [ ] 阴影:`import Qt5Compat.GraphicalEffects` 的 `DropShadow`,**只对静态层加**(动的时候关掉,贵)
-- [ ] 边框:1px `border.color: Qt.rgba(255,255,255,0.06)`,在亮背景下显出"玻璃感"
-- [ ] 全局留白比你直觉的大一点 —— ii 看着不挤就因为它内边距 12~16px 起步
+- [x] 圆角:`BlobRect.radius` 让 SDF 自渲;popup 内部组件 `Rectangle.radius` + `clip: true`
+- [x] 全局留白:popup 内 padding 至少 14~28px(MediaTab 已经按比例 padding)
+- [x] 玻璃感:dashboard popup 顶 → 底渐变 + BlurPanel(虽然只糊壁纸)
+- [ ] 阴影:popup 周围加柔和 `DropShadow`(`Qt5Compat.GraphicalEffects` 或 MultiEffect.shadow,只对静态加,动画时关)
+- [ ] 边框:1px `border.color: Qt.rgba(255,255,255,0.06)` 在 popup 边沿,玻璃感更明显
 
-### 5.2 动效(最影响"丝滑感")
+### 5.2 动效
 
-- [ ] 用 Material 3 标准 easing,不用 Qt 默认的 OutCubic:
-    - 标准曲线:`cubicBezier(0.2, 0, 0, 1)`,时长 ~300ms
-    - Emphasized(强调,Bar/Launcher 弹出用):`cubicBezier(0.05, 0.7, 0.1, 1)`,时长 ~400-500ms
-- [ ] 所有"出现/消失"都过渡(opacity + scale 0.95→1 + translateY),不要直接 visible 切换
-- [ ] 工作区指示器宽度变化用 `Behavior on width { NumberAnimation { duration: 200; easing.bezierCurve: ... } }`
-- [ ] 启用器 ListView 项之间用 `add/displaced Transition`,不要硬切
-- [ ] **关键禁忌**:不要全屏 `layer.enabled: true` + 实时滤镜,会卡。`MultiEffect` 比 `GraphicalEffects.*` 现代且便宜,优先用
+- [x] popup 开合走 cubic bezier(`[0.05, 0.7, 0.1, 1, 1, 1]` Emphasized)
+- [x] popup 切换 width/height/anchorX 都带 Behavior 平滑过渡
+- [x] popup scaleFrom 出场幅度小(big popup 不全幅展开,从 85% 起跳)
+- [x] tab 切换滑动下划线 + 字色 Behavior
+- [x] dropdown 菜单 opacity 渐入渐出
+- [x] cava 60Hz tick + Behavior on height 80ms OutQuad
+- [x] BlurPanel 两段式调度(慢一拍出现 + 关时反过来)
+- [ ] popup 内出现/消失动画(目前只有整体 fade in/out,可以加每个组件分批 stagger)
 
 ### 5.3 字与图标
 
-- [ ] 字体:`Google Sans` / `Inter` / `Geist`(ii 默认 Google Sans Flex)用作 UI 字体
-- [ ] 图标字体:`Material Symbols Rounded`(可变字重),`Text { font.family: "Material Symbols Rounded"; text: "settings" }` 比 SVG 轻得多
-- [ ] 行高:`lineHeight: 1.4` 起步,别让文字粘成一块
+- [x] 图标字体走 `Material Symbols Rounded` ligature(`Text { font.family: ...; text: "settings" }`)
+- [x] 文字字体统一 `Maple Mono NF CN`,精确 cut 用 `font.styleName: "ExtraBold"` 等绕开 weight 近似
+- [ ] 标题 / 正文 / 数字字符间距(letterSpacing)调整,避免粘连
 
-### 5.4 性能 / 别让它卡
+### 5.4 性能
 
-- [ ] 所有 panel 用 `LazyLoader`(ii 的写法),按需创建,不要一启动就全实例化
-- [ ] 大列表用 `ListView` 不要 `Repeater`(后者全量保留 item)
-- [ ] 单例服务的 Process / 文件订阅**只在需要时启动**,Idle 时停掉
-- [ ] niri event-stream 解析放 service 单例,不要每个模块各自启一个 Process
+- [x] cava 进程多消费者协调(`needBarViz` || `needMediaTab`),都不需要就停
+- [x] ddcutil 启动 prefetch + 缓存,popup 打开不重复 I2C 调用
+- [x] Loader 模式:popup 内容 / cava viz 都按需实例化
+- [ ] 检查所有 Process / Timer,确认 idle 时是否真的停了
+- [ ] 阻塞 GPU 的特效审查(如 niri blur 全屏问题已经避坑)
 
-## 阶段 6 —— 与 niri 配置接合
+---
 
-shell 跑稳后再回头改 niri 配置:
+## 阶段 6 —— niri 配置接合(部分完成)
 
-- [ ] `startup.kdl`:`spawn-at-startup "qs" "-c" "mine"`(qs 自动从 `~/.config/quickshell/mine/` 加载)
-- [ ] `rules.kdl` 启用 layer-rule 模板,namespace 填 `^mine-.*$`(或你 PanelWindow 里设定的)
-- [ ] `binds.kdl` 替换三件:
-    - `Mod+Space { spawn "fuzzel"; }` → `Mod+Space { spawn-sh "qs ipc call launcher toggle"; }`(可以保留 fuzzel 作 fallback)
-    - `Mod+V { spawn-sh "cliphist list | fuzzel ..."; }` → 自己实现 cliphist UI 后改 qs ipc
-    - `Ctrl+Alt+Delete { spawn "wlogout"; }` → 自己实现 sessionScreen 后改 qs ipc
-- [ ] `Mod+Tab` 是否保留 niri 原生 `toggle-overview`:可保留作 fallback,也可改成 qs 的 overview
+- [x] `startup.kdl` `spawn-at-startup "qs" "-p" "/home/yituoren/.config/quickshell/mine" "-d"`
+- [x] `environment.kdl` 设 PATH + QML_IMPORT_PATH = `/home/yituoren/.local/share/qt6/qml`
+- [x] `rules.kdl` 两条 layer-rule:`^mine-shell$`(空 body)+ `^mine-blur$`(blur + corner-radius 16)
+- [x] `layout.kdl` `struts.top 52` 让窗口避开 bar
+- [ ] `binds.kdl` 替换:
+    - [ ] `Mod+Space` → 自建 Launcher(目前还是 fuzzel)
+    - [ ] `Mod+V` → 自建剪贴板 UI(目前 fuzzel + cliphist)
+    - [ ] `Ctrl+Alt+Delete` → 自建 session 面板(目前 wlogout / power popup)
+- [x] `Mod+Tab` 走 niri 原生 `toggle-overview`(自建 Overview 出来后可换)
 
 ## 阶段 7 —— 卸 ii / 清场
 
 shell 自托管之后:
 
-- [ ] 卸 `illogical-impulse-*` 元包(留你想要的散件如 quickshell/matugen)
-- [ ] 删 `~/.config/quickshell/ii/`(确认你自己的 shell 没在 import 它)
-- [ ] 删 `~/.config/hypr/hyprland/scripts/fuzzel-emoji.sh` 这类已被 shell 内嵌的脚本
+- [ ] 卸 `illogical-impulse-*` 元包(留 quickshell/matugen 等散件)
+- [ ] 删 `~/.config/quickshell/ii/`(确认自己 shell 没 import 它)
+- [ ] 删 `~/.config/hypr/hyprland/scripts/` 已被 shell 内嵌的脚本
 - [ ] 删 Python venv `ILLOGICAL_IMPULSE_VIRTUAL_ENV`
-
----
-
-## 时间预期(诚实版)
-
-- 阶段 0 + 1:**1~2 天**(兼容层是最难的,做对了后面顺) — ✅
-- 阶段 2:**半天** — ✅
-- 阶段 3:**3~5 天**(三件套,Bar 最快、Overview 最磨人) — ⏳ Bar 主体已完工 + 工作区图标/动画到位;系统托盘 / 音量 / 电量待补;Launcher / Overview 未开工
-- 阶段 4:**每个模块半天到 1 天,挑用得上的做**
-- 阶段 5:**贯穿始终,持续 polish**
-
-第一周目标:阶段 0 → 阶段 3 跑通,能脱离 ii 日用,即使丑也行。第二周开始堆细节。
 
 ## 关键参考(查文档时不要绕弯路)
 

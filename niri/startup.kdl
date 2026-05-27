@@ -23,8 +23,10 @@ spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
 // 天气定位用的 geoclue agent(脚本仍在 hypr/ 下,路径有效)
 spawn-sh-at-startup "~/.config/hypr/hyprland/scripts/start_geoclue_agent.sh"
 
-// TODO: 你自己的 Quickshell shell 建好后,在这里加一行启动它,例如:
-// spawn-at-startup "qs" "-c" "你的shell名"
+// 自建 Quickshell shell —— mine config 在 ~/.config/quickshell/mine/(指向 ~/.dotfiles/quickshell/mine)
+// QML_IMPORT_PATH 由 niri/environment.kdl 提供,让 qs 能找到 ~/.local/share/qt6/qml/Caelestia/Blobs
+// (那个是自编的 SDF blob plugin,部署见 docs/quickshell.md)
+spawn-at-startup "qs" "-p" "/home/yituoren/.config/quickshell/mine" "-d"
 
 // TODO: 临时的 polkit 认证代理(原来由 ii 的 shell 提供,shell 建好后可删)
 // spawn-at-startup "/usr/lib/polkit-kde-authentication-agent-1"

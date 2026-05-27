@@ -92,6 +92,12 @@ binds {
     // 概览
     Mod+Tab { toggle-overview; }
 
+    // Vim 键位
+    Mod+H { focus-column-left; }
+    Mod+L { focus-column-right; }
+    Mod+K { focus-workspace-up; }
+    Mod+J { focus-workspace-down; }
+
     // ---- 多显示器 ---------------------------------------------------------
     Mod+Ctrl+Left   { focus-monitor-left; }
     Mod+Ctrl+Right  { focus-monitor-right; }
@@ -117,7 +123,7 @@ binds {
     XF86AudioPrev  allow-when-locked=true { spawn "playerctl" "previous"; }
 
     // ---- 会话 -------------------------------------------------------------
-    Mod+L       { spawn "loginctl" "lock-session"; }   // 锁屏(由 hypridle 触发 hyprlock)
+    // Mod+L       { spawn "loginctl" "lock-session"; }   // 锁屏(由 hypridle 触发 hyprlock)
     Mod+Shift+L { spawn "systemctl" "suspend"; }       // 睡眠
     Mod+Shift+E { quit; }                              // 退出 niri(带确认)
 
