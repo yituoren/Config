@@ -219,12 +219,12 @@ Dashboard popup 框架 + Media 完工。剩下:
 - [ ] 音量主 slider + 输入设备选择(目前只有输出)
 
 ### 媒体增强(给 Media tab)
-- [ ] **歌词服务** `services/Lyrics.qml`:
-    - 在线源 lrclib.net(免费,有同步 LRC),备用 NetEase Cloud API
-    - 缓存到 `~/.cache/quickshell-mine/lyrics/<artist>-<title>.lrc`
-    - 解析 `[mm:ss.xx] 歌词` 时间戳
-    - 暴露 `currentLine` / `prevLine` / `nextLine`(根据 player.position 派生)
-    - 接到 MediaTab 的 lyric 三行(目前是占位 ♪)
+- [x] **歌词服务** `services/Lyrics.qml`:LRCLIB 单源,debounce + signature 去重 + LRC 解析 + 二分定位 currentLine。MediaTab 三行已接(prev/current/next + loading/miss/error 状态)
+- [ ] **Apple Music PWA 修复** —— PWA 只调 `mediaSession.setMetadata()`,没调 `setPositionState()`,导致 plasma-browser-integration 给的 `mpris:length` 是占位 `9999999`(实际秒数没法读)+ position 永远是 0。修复路径:
+    - 写一个 userscript(Violentmonkey/Tampermonkey 装到 Chrome)在 `music.apple.com` 上跑,每 500ms 把网页内部 `<audio>.currentTime/duration/playbackRate` 喂给 `navigator.mediaSession.setPositionState(...)`,让 Chrome MPRIS / plasma-browser-integration 拿到真实 position+length
+    - 装完之后 LRCLIB 命中率 + 同步全活
+    - 进阶:Apple Music 自己的歌词 API(`amp-api.music.apple.com/v1/catalog/.../songs/{id}/lyrics`)毫秒级时间戳准,但要 developer token + user token,工程量大,先不做
+- [ ] LRCLIB miss 时加 `/api/search` fallback(去 album + 清洗 title 后端 fuzzy 匹配)
 - [ ] 媒体源选择:除 MPRIS 之外加 PipeWire stream 选择(浏览器音频没 MPRIS metadata 时也能调音量)
 
 ---

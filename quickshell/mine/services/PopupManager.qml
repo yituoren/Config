@@ -35,7 +35,7 @@ Singleton {
         // 配合 content 自带的 opacity fade,出场幅度减小不"砰一下铺开"
         "dashboard": {
             width: 880,
-            heightFn: (s) => Math.min(540, Math.round((s ? s.height : 1440) * 0.42)),
+            heightFn: (s) => Math.min(600, Math.round((s ? s.height : 1440) * 0.48)),
             scaleFrom: 0.85,
             // transparent: true 才走渐变 + BlurPanel;其他 popup 留纯黑实色
             transparent: true
@@ -51,6 +51,14 @@ Singleton {
 
     // dashboard popup 记住上次选中的 tab,下次打开就从这开始;首次默认 "dashboard"
     property string dashboardTab: "dashboard"
+
+    // ====== BlurPanel 切走 transparent 时的几何快照 ======
+    // dashboard → wifi 切换时,displayWidth/animatedAnchorX 会立刻开始动到 wifi 几何;
+    // BlurPanel 的收缩动画在跑(600ms scale 1→0),如果直接读 PopupManager.displayWidth 会跟着变形。
+    // 这里在 displayWidth 被改之前抓一次快照,BlurPanel 在 blurVisible=false 期间用这套
+    property real frozenBlurW: 0
+    property real frozenBlurH: 0
+    property real frozenBlurCX: 0
 
     // 开合动画进行中标记;scrim / popup 自己在这个期间应忽略 click,避免刚 hover 触发就被外点关掉
     property bool openInProgress: false
@@ -89,6 +97,19 @@ Singleton {
             }
         }
     }
+    // 切换 popup(从已开的 wifi/volume/... 切到 dashboard)时,openAmount 一直 ≥ 0.999 不会跨阈值,
+    // 单靠 onOpenAmountChanged 触发不了 blurAppearTimer。这个 timer 在 entryChanged 里手动 restart,
+    // delay = activeDuration + blurAppearDelay 等几何过渡(displayWidth/Height/animatedAnchorX)完成再点 blur
+    Timer {
+        id: blurSwitchTimer
+        interval: root.activeDuration + root.blurAppearDelay
+        repeat: false
+        onTriggered: {
+            if (root.entry && root.entry.transparent === true && root.openAmount >= 0.999) {
+                root.blurVisible = true
+            }
+        }
+    }
     Timer {
         id: blurCloseTimer
         interval: root.blurDisappearDelay
@@ -96,13 +117,39 @@ Singleton {
         onTriggered: root.currentPopup = ""
     }
 
-    // openAmount 越过 0.999 → 调度 blur 出现;低于 → 取消调度并强制 blur 关
-    // (popup 切换中 / 关闭中 都走这里,自动撤销已排队的 blur)
+    // ====== transparent → 非 transparent 切换的两段式 ======
+    // 用户在 dashboard 开着的情况下点 wifi:不直接切,先让 BlurPanel 收完 600ms 再真切
+    // pendingOpen 暂存目标 popup 的参数,timer 触发时做真正的 open
+    property var pendingOpen: null
+    Timer {
+        id: blurSwitchToOpaqueTimer
+        interval: root.blurDisappearDelay
+        repeat: false
+        onTriggered: {
+            const p = root.pendingOpen
+            if (!p) return
+            root.pendingOpen = null
+            root.currentScreen = p.screen
+            root.anchorX = p.screenLocalX
+            root.currentPopup = p.popupKey
+        }
+    }
+
+    // 抓一份当前 popup 几何到 frozenBlur*,BlurPanel 在收缩动画期间用它,
+    // 不会跟着 displayWidth 动到新 popup 几何上变形
+    function captureBlurGeometry(): void {
+        root.frozenBlurW = root.displayWidth
+        root.frozenBlurH = root.displayHeight + root.extraHeight
+        root.frozenBlurCX = root.animatedAnchorX - root.displayWidth * root.triggerRelativeX
+    }
+
+    // openAmount 越过 0.999 → 调度 blur 出现(从全关状态打开走这里);低于 → 取消调度并强制 blur 关
     onOpenAmountChanged: {
         if (root.openAmount >= 0.999 && root.entry && root.entry.transparent === true) {
             blurAppearTimer.restart()
-        } else {
+        } else if (root.openAmount < 0.999) {
             blurAppearTimer.stop()
+            blurSwitchTimer.stop()
             root.blurVisible = false
         }
     }
@@ -148,6 +195,12 @@ Singleton {
 
     onEntryChanged: {
         if (root.entry) {
+            // 切换感知:popup 之间直接切换时 openAmount 不跨阈值,需要在这里手动调度 blur
+            const newTransparent = root.entry.transparent === true
+            const switching = (root.openAmount >= 0.999)  // 已经有 popup 开着,这次是切换
+            // (transparent → 非 transparent 的两段式由 open() 里的 pendingOpen 处理,
+            //  这里到了 currentPopup 已经被切了,blur 也早就收完了)
+
             root.lastEntry = root.entry
             // 切到新 popup 立刻把 duration 换上,后续所有 Behavior 用这个速度
             // 关闭时(entry → null)不动 activeDuration,关闭动画就会沿用打开时的速度
@@ -180,20 +233,55 @@ Singleton {
             }
 
             root.animatedAnchorX = root.anchorX
+
+            // ===== Blur 切换调度 =====
+            // 切换到 transparent popup(非 transparent → transparent):openAmount 一直 1,
+            // 需要在此手动启动 blurSwitchTimer,等几何过渡完再点 blur
+            // (transparent → 非 transparent 方向不在这里处理,由 open() 的 pendingOpen 在切之前等 blur 收完)
+            if (switching && newTransparent) {
+                blurAppearTimer.stop()
+                blurSwitchTimer.restart()
+            }
+            // 从全关状态打开 → openAmount 0→1 跨阈值时 onOpenAmountChanged 会处理
         }
         root.openAmount = root.entry ? 1 : 0
     }
 
     function open(popupKey: string, screen: var, screenLocalX: real): void {
+        // 清掉任何 pending(用户改主意)
+        root.pendingOpen = null
+        blurSwitchToOpaqueTimer.stop()
+
+        const newEntry = root.registry[popupKey] ?? null
+        const newIsTransparent = newEntry && newEntry.transparent === true
+
+        // 当前 transparent + blur 已亮 + 切到非 transparent → 两段式:先收 blur,600ms 后再真切
+        // (跟 close() 一样的节奏,让 blur 收完再换 popup,不要边收边变形)
+        if (root.entry && root.entry.transparent === true && root.blurVisible && !newIsTransparent) {
+            captureBlurGeometry()  // BlurPanel 收缩期间用这个尺寸,不跟着 displayWidth 变
+            root.pendingOpen = { popupKey: popupKey, screen: screen, screenLocalX: screenLocalX }
+            blurAppearTimer.stop()
+            blurSwitchTimer.stop()
+            root.blurVisible = false
+            blurSwitchToOpaqueTimer.restart()
+            return
+        }
+
+        // 普通直接 open
         root.currentScreen = screen
         root.anchorX = screenLocalX
         root.currentPopup = popupKey
     }
 
     function close(): void {
+        // 清 pending(用户关 popup 不再切到目标 popup)
+        root.pendingOpen = null
+        blurSwitchToOpaqueTimer.stop()
+
         // transparent popup 且 blur 已经亮起:先关 blur,等一拍再真正收回 popup
         // 别的情形:直接收
         if (root.entry && root.entry.transparent === true && root.blurVisible) {
+            captureBlurGeometry()  // BlurPanel 收缩期间用快照尺寸,不跟着 popup 收回变形
             root.blurVisible = false
             blurAppearTimer.stop()
             blurCloseTimer.restart()  // 时间到 → currentPopup = ""

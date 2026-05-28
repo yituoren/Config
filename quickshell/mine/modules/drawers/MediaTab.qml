@@ -497,9 +497,12 @@ Item {
                     }
                 }
 
-                // ── 中间歌词区(占位:前一句 / 当前 / 后一句 三行)──
-                // 真实歌词后续接 LyricsService;现在用占位字符串展示布局
-                // 当前句字号大 Bold + primary 色;前后句字号小 Medium + 半透 outline 色
+                // ── 中间歌词区:Lyrics service → 前一句 / 当前 / 后一句 三行 ──
+                // 数据源 services/Lyrics.qml(LRCLIB)。
+                // - status ok:正常 3 行滚动
+                // - status loading:中间显示 "Loading lyrics…"
+                // - status miss/idle:中间淡显 "♪" 或 "No lyrics"
+                // - status plain:无时间戳,中间显示首行,前后留空
                 Item {
                     id: lyricArea
                     anchors {
@@ -507,6 +510,22 @@ Item {
                         bottom: progressRow.top; bottomMargin: 18
                         left: parent.left; right: parent.right
                     }
+
+                    readonly property bool synced: Lyrics.status === "ok"
+                    readonly property string midText: {
+                        switch (Lyrics.status) {
+                        case "ok": return Lyrics.currentLine || "♪"
+                        case "loading": return "Loading lyrics…"
+                        case "miss": return "No lyrics"
+                        case "error": return "Lyrics fetch failed"
+                        case "plain": return Lyrics.lines.length > 0 ? Lyrics.lines[0].text : ""
+                        default: return root.active ? "♪" : "—"
+                        }
+                    }
+                    readonly property color midColor: lyricArea.synced
+                        ? Theme.colors.primary
+                        : Theme.colors.on_surface_variant
+                    readonly property real midOpacity: lyricArea.synced ? 1.0 : 0.45
 
                     Column {
                         anchors.centerIn: parent
@@ -517,30 +536,34 @@ Item {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
-                            text: "♪  lyrics coming soon"
+                            text: Lyrics.prevLine
                             color: Theme.colors.on_surface_variant
                             opacity: 0.35
                             font.family: "Maple Mono NF CN"
                             font.pixelSize: 11
                             font.styleName: "Medium"
                             elide: Text.ElideRight
+                            Behavior on text { PropertyAnimation { duration: 0 } }
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
-                            text: root.active ? "♪" : "—"
-                            color: Theme.colors.primary
+                            text: lyricArea.midText
+                            color: lyricArea.midColor
+                            opacity: lyricArea.midOpacity
                             font.family: "Maple Mono NF CN"
                             font.pixelSize: 15
                             font.styleName: "Bold"
                             elide: Text.ElideRight
+                            Behavior on opacity { NumberAnimation { duration: 180 } }
+                            Behavior on color { ColorAnimation { duration: 180 } }
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
-                            text: ""
+                            text: Lyrics.nextLine
                             color: Theme.colors.on_surface_variant
                             opacity: 0.35
                             font.family: "Maple Mono NF CN"

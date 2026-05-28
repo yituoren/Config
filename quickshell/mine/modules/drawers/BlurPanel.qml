@@ -32,42 +32,41 @@ PanelWindow {
 
     readonly property bool popupOnThisScreen: PopupManager.currentScreen === root.modelData
 
-    // 只为 transparent popup(dashboard)启用 BlurPanel
-    readonly property bool popupTransparent: {
-        const e = PopupManager.entry ?? PopupManager.lastEntry
-        return e && e.transparent === true
-    }
+    // 几何来源:
+    //   - blurVisible=true 期间(BlurPanel 在显示中):跟着 PopupManager.displayWidth 实时走
+    //   - blurVisible=false 但 animatedScale > 0 还在收缩(切走 transparent 后):
+    //       用 PopupManager.frozenBlurW/H/CX 快照,避免 BlurPanel 边收缩边变形成 wifi 形状
+    readonly property bool useFrozen: !PopupManager.blurVisible && root.animatedScale > 0.001
+    readonly property real liveW: PopupManager.displayWidth
+    readonly property real liveH: PopupManager.displayHeight + PopupManager.extraHeight
+    readonly property real liveCX: PopupManager.animatedAnchorX - root.liveW * PopupManager.triggerRelativeX
 
-    // BlurPanel 不参与 popup 的 scale 动画 —— 只在 popup **完全打开后**才出现
-    // 尺寸 = popup 显示尺寸(displayWidth × displayHeight + extraHeight),无缩放
-    // 关闭时:openAmount 一离开 ~1 → BlurPanel 立刻 snap 隐藏 → popup 才继续收回
-    //   这样实现"先关 blur 再关 popup"的顺序,不会出现 BlurPanel 边沿露出 popup 缩小后的边界
-    readonly property real popupW: PopupManager.displayWidth
-    readonly property real popupH: PopupManager.displayHeight + PopupManager.extraHeight
-    readonly property real popupCX: PopupManager.animatedAnchorX - root.popupW * PopupManager.triggerRelativeX
+    readonly property real popupW: root.useFrozen ? PopupManager.frozenBlurW : root.liveW
+    readonly property real popupH: root.useFrozen ? PopupManager.frozenBlurH : root.liveH
+    readonly property real popupCX: root.useFrozen ? PopupManager.frozenBlurCX : root.liveCX
     // 跟 ContentWindow.popupY 一致(barTopMargin 8 + barHeight 44 + 4)
     readonly property real popupCY: 56
 
-    // 动画因子:0 → BlurPanel 收成中心一点(不可见),1 → 满展到 popup 同尺
-    // PopupManager.blurVisible 翻转时,Behavior 把它平滑从 0 ↔ 1
-    // 关闭时 PopupManager.blurDisappearDelay(600ms)≥ 这里 duration,保证 popup 在 blur 完全缩回后才开始收
+    // 动画因子:0 → BlurPanel 收成中心一点,1 → 满展到 popup 同尺
+    // PopupManager.blurVisible 翻转时 Behavior 把它平滑从 0 ↔ 1(600ms)
     property real animatedScale: PopupManager.blurVisible ? 1 : 0
     Behavior on animatedScale {
         NumberAnimation {
             duration: 600
             easing.type: Easing.BezierSpline
-            // gentle ease-out:开头快(blur 立刻有感),尾巴慢慢饱和到满
             easing.bezierCurve: [0.22, 0.61, 0.36, 1, 1, 1]
         }
     }
 
-    // 缩放后的尺寸 + 中心保持在 popup 几何中心
+    // 缩放后尺寸,中心保持在 popup 中心
     readonly property real scaledW: root.popupW * root.animatedScale
     readonly property real scaledH: root.popupH * root.animatedScale
     readonly property real centerX: root.popupCX + root.popupW / 2
     readonly property real centerY: root.popupCY + root.popupH / 2
 
-    visible: root.popupOnThisScreen && root.popupTransparent
+    // 不再用 popupTransparent 守门:只要 animatedScale > 阈值就显示。
+    // 真正"是不是该出现 BlurPanel"由 PopupManager.blurVisible 控制 → animatedScale → 这里
+    visible: root.popupOnThisScreen
              && root.animatedScale > 0.001
              && root.popupW > 1 && root.popupH > 1
 

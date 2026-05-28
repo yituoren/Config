@@ -32,6 +32,9 @@ PanelWindow {
     // 渲染在 mine-shell 下方;mine-shell 的 SDF popup 半透 colorBottom 让 blur 画面透过来
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
+    // OnDemand:popup 里的 TextField(dashboard 添加 todo 输入框)点击时能拿键盘焦点。
+    // 默认 None 时 layer-shell 完全不接收键盘事件,输入框失明。
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
     // 走 niri layout.kdl 的 struts 给 bar 留位(struts.top=0,bar 用 exclusive_zone),
     // 这里因为是全屏 anchor,exclusive_zone 没法用,改回靠 struts 预留
 
@@ -1425,15 +1428,29 @@ PanelWindow {
                             width: tabRow.width / tabRepeater.count
                             height: tabBar.height
 
-                            Text {
+                            Row {
                                 id: tabLabel
                                 anchors.centerIn: parent
-                                text: tab.modelData.label
-                                color: tab.isActive ? Theme.colors.primary : Theme.colors.on_surface_variant
-                                font.family: "Maple Mono NF CN"
-                                font.pixelSize: 16
-                                font.styleName: tab.isActive ? "ExtraBold" : "Medium"
-                                Behavior on color { ColorAnimation { duration: 200 } }
+                                spacing: 6
+                                readonly property color tint: tab.isActive ? Theme.colors.primary : Theme.colors.on_surface_variant
+
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: tab.modelData.icon
+                                    color: tabLabel.tint
+                                    font.family: "Material Symbols Rounded"
+                                    font.pixelSize: 18
+                                    Behavior on color { ColorAnimation { duration: 200 } }
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: tab.modelData.label
+                                    color: tabLabel.tint
+                                    font.family: "Maple Mono NF CN"
+                                    font.pixelSize: 16
+                                    font.styleName: tab.isActive ? "ExtraBold" : "Medium"
+                                    Behavior on color { ColorAnimation { duration: 200 } }
+                                }
                             }
 
                             MouseArea {
@@ -1494,6 +1511,9 @@ PanelWindow {
                 sourceComponent: {
                     switch (dashRoot.currentTab) {
                     case "media": return mediaTabComp
+                    case "dashboard": return dashboardTabComp
+                    case "weather": return weatherTabComp
+                    case "control": return controlTabComp
                     default: return placeholderComp
                     }
                 }
@@ -1502,6 +1522,21 @@ PanelWindow {
             Component {
                 id: mediaTabComp
                 MediaTab {}
+            }
+
+            Component {
+                id: dashboardTabComp
+                DashboardTab {}
+            }
+
+            Component {
+                id: weatherTabComp
+                WeatherTab {}
+            }
+
+            Component {
+                id: controlTabComp
+                ControlTab {}
             }
 
             // 未实现的 tab 占位
